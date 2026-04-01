@@ -4,6 +4,7 @@
 #include <time.h>
 #include "file_reader.h"
 #include "game_logic.h"
+#include "parser.h"
 
 #define MAX_ANSWER_SIZE 8
 #define RED "\033[0;31m"
@@ -74,7 +75,12 @@ int main()
        while (attempts < max_guess && game_won != 1)
        {
               scanf(" %8s", answer);
-              if (strncmp(answer, equation, 8) == 0)
+              if (validate_equation(answer) == 0)
+              {
+                     printf("Invalid equation! Try again.\n");
+                     continue; /* don't consume an attempt */
+              }
+              if (strncmp(answer, equation, EQUATION_LEN) == 0)
               {
                      printf("You got the answer!");
                      break;
