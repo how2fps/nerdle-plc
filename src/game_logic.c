@@ -22,7 +22,11 @@ GameState *create_game(char *target_equation)
        {
               return NULL;
        }
-       g->answer = strdup(target_equation);
+       g->answer = malloc(strlen(target_equation) + 1);
+       if (g->answer != NULL)
+       {
+              strcpy(g->answer, target_equation);
+       }
        g->attemptsLeft = 6;
        print(g);
        return g;
