@@ -1,7 +1,7 @@
 #ifndef EVALUATOR_H
 #define EVALUATOR_H
-#define EQUATION_LEN 8
+#include "tokenizer.h"
 
-int evaluate_expression(char *expression);
+int evaluate_expression(Token tokens[EQUATION_LEN + 1]);
 
 #endif
