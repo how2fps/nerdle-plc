@@ -31,3 +31,47 @@ GameState *create_game(char *target_equation)
        print(g);
        return g;
 }
+
+static SlotInput next_slot_input(
+       char guess_char, 
+       char answer_char, 
+       char *answer_str)
+{
+       return (SlotInput){
+              .in_answer = (strchr(answer_str, guess_char) != NULL) ? 1 : 0,
+              .correct_position = (guess_char == answer_char) ? 1 : 0
+       };
+}
+
+static SlotState next_slot_state(SlotState current, SlotInput input)
+{
+       if (input.in_answer && input.correct_position)
+       {
+              return CORRECT;
+       }
+       else if (input.in_answer)
+       {
+              return PARTIAL;
+       }
+       else
+       {
+              return WRONG;
+       }
+}
+
+SlotState *evaluate_guess(const char *guess, const char *answer)
+{
+       size_t i;
+       SlotInput input;
+       SlotState *result = malloc(sizeof(SlotState) * strlen(answer));
+       if (result == NULL || guess == NULL || answer == NULL || strlen(guess) != strlen(answer))
+       {
+              return NULL;
+       }
+       for (i = 0; i < strlen(answer); i++)
+       {
+              input = next_slot_input(guess[i], answer[i], (char *)answer);
+              result[i] = next_slot_state(WRONG, input);
+       }
+       return result;
+}
