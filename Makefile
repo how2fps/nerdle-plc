@@ -30,4 +30,4 @@ parser.o: $(SRC_DIR)/parser.c $(SRC_DIR)/parser.h
 
 .PHONY: clean
 clean:
-	rm -f *.o nerdle
+	del *.o nerdle
