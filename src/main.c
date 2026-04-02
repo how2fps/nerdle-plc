@@ -19,14 +19,13 @@ int main()
 
        /*load equation list from file here*/
        char *equation;
-       char *answer;
+       char *guess;
        int attempts = 0;
        int game_won = 0;
        int max_guess = 6;
        int line_count = 0;
        int random_line;
-       /*char equation[9];
-       GameState game;*/
+       /*char equation[9];*/
        char line[100];
 
        char input[100];
@@ -82,6 +81,8 @@ int main()
               }
        }
 
+       GameFSM *game;
+
        srand(time(NULL));
        fp = read_file("equations.txt");
        while (fgets(line, sizeof(line), fp))
@@ -116,27 +117,41 @@ int main()
 
        strncpy(equation, line, len);
        equation[len] = '\0';
+       printf("%s\n", equation);
 
-       answer = (char *)malloc(sizeof(char) * (MAX_ANSWER_SIZE + 1));
-       if (answer == NULL)
+       game = create_game(equation);
+       if (game == NULL || game->answer == NULL)
+       {
+              free(equation);
+              if (game != NULL)
+              {
+                     free(game);
+              }
+                     return 1;
+       }
+
+       guess = (char *)malloc(sizeof(char) * (MAX_ANSWER_SIZE + 1));
+       if (guess == NULL)
        {
               return 1;
        }
-       printf("%s\n", equation);
+
        printf("Start guessing!\n");
        while (attempts < max_guess && game_won != 1)
        {
-              scanf(" %8s", answer);
-              if (validate_equation(answer) == 0)
+              scanf(" %8s", guess);
+              validate_userinput(game, guess);
+
+              /* if (validate_equation(guess) == 0)
               {
                      printf("Invalid equation! Try again.\n");
-                     continue; /* don't consume an attempt */
+                     continue;  don't consume an attempt 
               }
-              if (strncmp(answer, equation, EQUATION_LEN) == 0)
+              if (strncmp(guess, equation, EQUATION_LEN) == 0)
               {
                      printf("You got the answer!");
                      break;
-              };
+              }; */
 
               attempts++;
        }
