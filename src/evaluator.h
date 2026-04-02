@@ -10,4 +10,6 @@ int evaluate_expression(Token tokens[EQUATION_LEN + 1]);
 
 int precedence(char op);
 
+int evaluate_lhs(const char *buf, int len, double *result);
+
 #endif

@@ -3,7 +3,7 @@
 
 char *tokenize_expression(const char *expression, Token tokens[EQUATION_LEN + 1])
 {
-       char *ptr = expression;
+       const char *ptr = expression;
        int i = 0;
        int char_idx;
        while (*ptr != '\0' && i < EQUATION_LEN + 1)

@@ -1,12 +1,12 @@
 CC = gcc
 CFLAGS = -ansi -pedantic -Wall -Werror -g
 SRC_DIR=src
-OFILES = main.o game_logic.o file_reader.o
+OFILES = main.o game_logic.o file_reader.o parser.o evaluator.o tokenizer.o
 
 nerdle: $(OFILES)
 	$(CC) $(OFILES) -o nerdle
 
-main.o: $(SRC_DIR)/main.c $(SRC_DIR)/game_logic.h
+main.o: $(SRC_DIR)/main.c $(SRC_DIR)/game_logic.h $(SRC_DIR)/parser.h
 	$(CC) $(CFLAGS) -c $(SRC_DIR)/main.c
 
 game_logic.o: $(SRC_DIR)/game_logic.c $(SRC_DIR)/game_logic.h
@@ -15,5 +15,15 @@ game_logic.o: $(SRC_DIR)/game_logic.c $(SRC_DIR)/game_logic.h
 file_reader.o: $(SRC_DIR)/file_reader.c $(SRC_DIR)/file_reader.h
 	$(CC) $(CFLAGS) -c $(SRC_DIR)/file_reader.c
 
+parser.o: $(SRC_DIR)/parser.c $(SRC_DIR)/parser.h $(SRC_DIR)/evaluator.h
+	$(CC) $(CFLAGS) -c $(SRC_DIR)/parser.c
+
+evaluator.o: $(SRC_DIR)/evaluator.c $(SRC_DIR)/evaluator.h $(SRC_DIR)/tokenizer.h
+	$(CC) $(CFLAGS) -c $(SRC_DIR)/evaluator.c
+
+tokenizer.o: $(SRC_DIR)/tokenizer.c $(SRC_DIR)/tokenizer.h
+	$(CC) $(CFLAGS) -c $(SRC_DIR)/tokenizer.c
+
 .PHONY: clean
-clean: rm -f *.o nerdle
+clean:
+	rm -f *.o nerdle

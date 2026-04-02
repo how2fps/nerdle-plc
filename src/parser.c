@@ -3,6 +3,7 @@
 #include <string.h>
 #include <ctype.h>
 #include "parser.h"
+#include "evaluator.h"
 
 static FSMState next_state(FSMState current, char c)
 {
