@@ -1,6 +1,7 @@
 #include "evaluator.h"
 #include <stdlib.h>
 #include <stdio.h>
+#include <string.h>
 
 int precedence(char op)
 {
@@ -40,7 +41,7 @@ void infix_to_postfix(Token infix[EQUATION_LEN + 1], Token postfix[EQUATION_LEN 
                      if (top >= 0)
                      {
                             topPrecedence = precedence(stack[top]);
-                            incomingPrecedence = precedence(infix[i].text);
+                            incomingPrecedence = precedence(infix[i].text[0]);
                             if (topPrecedence >= incomingPrecedence)
                             {
                                    while (top >= 0 && precedence(stack[top]) >= incomingPrecedence)

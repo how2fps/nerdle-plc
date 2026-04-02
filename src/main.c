@@ -5,6 +5,7 @@
 #include "file_reader.h"
 #include "game_logic.h"
 #include "parser.h"
+#include "evaluator.h"
 
 #define MAX_ANSWER_SIZE 8
 #define RED "\033[0;31m"
@@ -27,8 +28,59 @@ int main()
        /*char equation[9];
        GameState game;*/
        char line[100];
+
+       char input[100];
        int i;
        int len;
+       int choice = 0;
+       int running = 1;
+
+       while (running)
+       {
+              printf("\n=== MATH GAME MENU ===\n");
+              printf("1. Play Game\n");
+              printf("2. Check Leaderboard\n");
+              printf("3. Add New Equation\n");
+              printf("4. Exit\n");
+              printf("Selection: ");
+
+              if (fgets(input, sizeof(input), stdin) == NULL)
+                     break;
+              choice = atoi(input);
+
+              switch (choice)
+              {
+              case 1:
+                     printf("\n--- Starting Game ---\n");
+                     /* Call your game logic here */
+                     break;
+
+              case 2:
+                     printf("\n--- Leaderboard ---\n");
+                     /* Call leaderboard display function */
+                     break;
+
+              case 3:
+                     printf("\n--- Add New Equation ---\n");
+                     printf("Enter equation (e.g., 5+2=7): ");
+                     if (fgets(input, sizeof(input), stdin) != NULL)
+                     {
+                            /* Strip the newline character if present */
+                            input[strcspn(input, "\n")] = 0;
+                            process_line(input);
+                     }
+                     break;
+
+              case 4:
+                     printf("Goodbye!\n");
+                     running = 0;
+                     break;
+
+              default:
+                     printf("Invalid choice. Please try again.\n");
+                     break;
+              }
+       }
 
        srand(time(NULL));
        fp = read_file("equations.txt");
