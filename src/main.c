@@ -6,19 +6,66 @@
 #include "game_logic.h"
 #include "parser.h"
 #include "evaluator.h"
+#include <conio.h>
+#include <ctype.h>
 
 #define MAX_ANSWER_SIZE 8
 #define RED "\033[0;31m"
 #define GREEN "\033[0;32m"
 #define YELLOW "\033[0;33m"
 #define RESET "\033[0m"
+void get_aesthetic_input(char *buffer, int max_len)
+{
+       int current_len = 0;
+       char ch;
+       int i = 0;
 
+       memset(buffer, 0, max_len + 1);
+
+       while (1)
+       {
+              printf("\rEnter equation: ");
+
+              printf("%s", buffer);
+
+              for (i = 0; i < (max_len - current_len); i++)
+              {
+                     printf("_");
+              }
+
+              ch = _getch();
+
+              if (ch == '\r' || ch == '\n')
+              {
+                     if (current_len == max_len)
+                     {
+                            break;
+                     }
+                     continue;
+              }
+
+              if (ch == '\b')
+              {
+                     if (current_len > 0)
+                     {
+                            current_len--;
+                            buffer[current_len] = '\0';
+                     }
+              }
+              else if (current_len < max_len && isprint(ch))
+              {
+                     buffer[current_len] = ch;
+                     current_len++;
+                     buffer[current_len] = '\0';
+              }
+       }
+       printf("\n");
+}
 int main()
 {
        FILE *fp;
 
-       /*load equation list from file here*/
-       char *equation;
+       char equation[EQUATION_LEN + 1];
        char *answer;
        int attempts = 0;
        int game_won = 0;
@@ -45,30 +92,29 @@ int main()
               printf("Selection: ");
 
               if (fgets(input, sizeof(input), stdin) == NULL)
+              {
                      break;
+              }
+
               choice = atoi(input);
 
               switch (choice)
               {
               case 1:
                      printf("\n--- Starting Game ---\n");
-                     /* Call your game logic here */
                      break;
 
               case 2:
                      printf("\n--- Leaderboard ---\n");
-                     /* Call leaderboard display function */
                      break;
 
               case 3:
-                     printf("\n--- Add New Equation ---\n");
-                     printf("Enter equation (e.g., 5+2=7): ");
-                     if (fgets(input, sizeof(input), stdin) != NULL)
+                     get_aesthetic_input(input, EQUATION_LEN);
+                     if (validate_equation(input))
                      {
-                            /* Strip the newline character if present */
-                            input[strcspn(input, "\n")] = 0;
                             process_line(input);
                      }
+
                      break;
 
               case 4:
@@ -106,12 +152,6 @@ int main()
        {
               line[len - 1] = '\0';
               len--;
-       }
-
-       equation = (char *)malloc(sizeof(char) * (len + 1));
-       if (equation == NULL)
-       {
-              return 1;
        }
 
        strncpy(equation, line, len);
