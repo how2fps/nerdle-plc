@@ -79,7 +79,7 @@ int main()
        char input[100];
        int i;
        int len;
-       int choice = 0;
+       char choice;
        int running = 1;
 
        while (running)
@@ -91,24 +91,20 @@ int main()
               printf("4. Exit\n");
               printf("Selection: ");
 
-              if (fgets(input, sizeof(input), stdin) == NULL)
-              {
-                     break;
-              }
-
-              choice = atoi(input);
+              choice = _getch();
+              printf("%c\n", choice);
 
               switch (choice)
               {
-              case 1:
+              case '1':
                      printf("\n--- Starting Game ---\n");
                      break;
 
-              case 2:
+              case '2':
                      printf("\n--- Leaderboard ---\n");
                      break;
 
-              case 3:
+              case '3':
                      get_aesthetic_input(input, EQUATION_LEN);
                      if (validate_equation(input))
                      {
@@ -117,10 +113,9 @@ int main()
 
                      break;
 
-              case 4:
+              case '4':
                      printf("Goodbye!\n");
-                     running = 0;
-                     break;
+                     return 0;
 
               default:
                      printf("Invalid choice. Please try again.\n");
