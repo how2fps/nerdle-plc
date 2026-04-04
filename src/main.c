@@ -129,6 +129,12 @@ int main()
                             strncpy(guess, guess_input, MAX_ANSWER_SIZE);
                             guess[MAX_ANSWER_SIZE] = '\0';
 
+                            if (game->current_state == GAME_STATE_START)
+                            {
+                                   transition_gamestate(game, GAME_EVENT_INIT); /* to GAME_STATE_INPUT  */
+                            }
+                            transition_gamestate(game, GAME_EVENT_SUBMIT_GUESS); /* to GAME_STATE_VALIDATION  */
+
                             status = play_guess_turn(game, guess);
                             if (status == GUESS_INVALID)
                             {

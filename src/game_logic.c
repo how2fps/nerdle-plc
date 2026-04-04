@@ -268,7 +268,6 @@ void game_result(GameFSM *fsm, const char *guess, const SlotState *feedback)
               {
                      printf(YELLOW "%c" RESET, guess[i]);
                      all_correct = 0;
-
               }
               else
               {
@@ -285,19 +284,20 @@ void game_result(GameFSM *fsm, const char *guess, const SlotState *feedback)
        }
 
        if (all_correct)
-       {
+       {      
+              /* GAME WON */
               fsm->has_won = 1;
-              transition_gamestate(fsm, GAME_EVENT_CORRECT_GUESS);
+              transition_gamestate(fsm, GAME_EVENT_CORRECT_GUESS); /* to GAME_STATE_WON */
        }
        else
        {
               if (get_guesses_left(fsm) == 0)
-              {
-                     transition_gamestate(fsm, GAME_EVENT_OUT_OF_GUESSES);
+              {      /* GAME LOST */
+                     transition_gamestate(fsm, GAME_EVENT_OUT_OF_GUESSES); /* to GAME_STATE_LOST */
               }
               else
               {
-                     transition_gamestate(fsm, GAME_EVENT_INCORRECT_GUESS);
+                     transition_gamestate(fsm, GAME_EVENT_INCORRECT_GUESS); /* to GAME_STATE_INPUT */
               }
        }
 }
@@ -314,6 +314,7 @@ void print_round_status(GameFSM *game)
        }
 }
 
+/* "main" function of game logic */
 GuessStatus play_guess_turn(GameFSM *fsm, const char *guess)
 {
        SlotState *feedback;
@@ -326,17 +327,22 @@ GuessStatus play_guess_turn(GameFSM *fsm, const char *guess)
 
        if (fsm->current_state == GAME_STATE_START)
        {
-              transition_gamestate(fsm, GAME_EVENT_INIT);
+              transition_gamestate(fsm, GAME_EVENT_INIT); /* to GAME_STATE_INPUT  */
        }
 
-       if (fsm->current_state != GAME_STATE_INPUT)
+       if (fsm->current_state == GAME_STATE_INPUT)
+       {
+              transition_gamestate(fsm, GAME_EVENT_SUBMIT_GUESS); /* to GAME_STATE_VALIDATION  */
+       }
+
+       if (fsm->current_state != GAME_STATE_VALIDATION)
        {
               return GUESS_ERROR;
        }
 
-       transition_gamestate(fsm, GAME_EVENT_SUBMIT_GUESS);
-
-       validation_status = validate_guess(fsm, guess);
+       validation_status = validate_guess(fsm, guess);  
+       /* validate_guess() transitions fsm to GAME_STATE_EVALUTAION if validation passes, 
+       back to GAME_STATE_INPUT without decreasing guesses left */
        if (validation_status != VALIDATION_OK)
        {
               if (validation_status == VALIDATION_WRONG_LENGTH)
@@ -354,14 +360,16 @@ GuessStatus play_guess_turn(GameFSM *fsm, const char *guess)
               return GUESS_INVALID;
        }
 
-       feedback = evaluate_guess(fsm, guess);
+       feedback = evaluate_guess(fsm, guess); 
        if (feedback == NULL)
        {
               return GUESS_ERROR;
        }
 
-       transition_gamestate(fsm, GAME_EVENT_EVALUATION_DONE);
-       game_result(fsm, guess, feedback);
+       transition_gamestate(fsm, GAME_EVENT_EVALUATION_DONE); /* to GAME_STATE_RESULT */
+       game_result(fsm, guess, feedback); 
+       /* game_result() transitions fsm to GAME_STATE_WON, GAME_STATE_LOST,
+        or back to GAME_STATE_INPUT on win, lose and guesses left > 0 respectively */
        free(feedback);
        print_round_status(fsm);
 
