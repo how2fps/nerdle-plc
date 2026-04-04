@@ -310,7 +310,7 @@ void print_round_status(GameFSM *game)
        }
        else
        {
-              printf("Guesses left: %d\n", get_guesses_left(game));
+              printf("Guesses left: %d\n\n", get_guesses_left(game));
        }
 }
 
@@ -347,15 +347,15 @@ GuessStatus play_guess_turn(GameFSM *game, const char *guess)
        {
               if (validation_status == VALIDATION_WRONG_LENGTH)
               {
-                     printf("Invalid equation! Must be %d characters.\n", EQUATION_LEN);
+                     printf("Invalid equation! Must be %d characters.\n\n", EQUATION_LEN);
               }
               else if (validation_status == VALIDATION_BAD_EQUATION)
               {
-                     printf("Invalid equation! Try again.\n");
+                     printf("Invalid equation! Try again.\n\n");
               }
               else
               {
-                     printf("Invalid input. Try again.\n");
+                     printf("Invalid input. Try again.\n\n");
               }
               return GUESS_INVALID;
        }
