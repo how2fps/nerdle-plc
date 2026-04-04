@@ -5,13 +5,14 @@
 
 typedef enum
 {
-        START,
-        INPUT,
-        VALIDATION,
-        EVALUATION,
-        RESULT
-
-} game_state;
+        GAME_STATE_START,
+        GAME_STATE_INPUT,
+        GAME_STATE_VALIDATION,
+        GAME_STATE_EVALUATION,
+        GAME_STATE_RESULT,
+        GAME_STATE_WON,
+        GAME_STATE_LOST
+} GameState;
 
 typedef enum
 {
@@ -19,25 +20,67 @@ typedef enum
         GAME_EVENT_SUBMIT_GUESS,
         GAME_EVENT_VALIDATION_OK,
         GAME_EVENT_VALIDATION_FAIL,
-        GAME_EVENT_EVALUATION_DONE
+        GAME_EVENT_EVALUATION_DONE,
+        GAME_EVENT_INCORRECT_GUESS,
+        GAME_EVENT_CORRECT_GUESS,
+        GAME_EVENT_OUT_OF_GUESSES
 } GameEvent;
 
+typedef enum
+{
+        GUESS_ERROR,
+        GUESS_INVALID,
+        GUESS_INCORRECT,
+        GUESS_CORRECT
+} GuessStatus;
+
+typedef enum
+{
+        VALIDATION_NULL_INPUT,
+        VALIDATION_WRONG_LENGTH,
+        VALIDATION_BAD_EQUATION,
+        VALIDATION_OK
+} ValidationStatus;
+
+
 typedef struct LeGameFSM{
+        GameState current_state;
         char *answer;
+        int max_guesses;
+        int guesses_used;
+        int has_won;
         void (*print)(struct LeGameFSM *);
-        int attemptsLeft;
-        game_state current_state;
-        int x; 
-        int y;
 } GameFSM;
 
 void print(GameFSM *);
 
-GameFSM *create_game(char *target_equation);
+GameFSM *create_game(char *target_equation, int guesses, int initial_has_won);
+void destroy_game(GameFSM *game);
+int get_guesses_left(const GameFSM *game);
+int is_game_won(const GameFSM *game);
+const char *game_state_to_string(GameState state);
 
+void transition_gamestate(GameFSM *game, GameEvent event);
+ValidationStatus validate_guess(GameFSM *game, const char *guess);
 
-void transition_gamestate(GameFSM *fsm, GameEvent event);
-void validate_userinput(GameFSM *fsm, char *guess);
+typedef enum
+{
+        WRONG,
+        PARTIAL,
+        CORRECT
+} SlotState;
+
+typedef struct{
+        int in_answer;
+        int correct_position;
+} SlotInput;
+
+SlotState *evaluate_guess(GameFSM *game, const char *guess);
+
+void game_result(GameFSM *game, const char *guess, const SlotState *feedback);
+
+void print_round_status(GameFSM *game);
+GuessStatus play_guess_turn(GameFSM *game, const char *guess);
 
 
 #endif
