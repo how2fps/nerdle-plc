@@ -8,6 +8,9 @@
 #include "evaluator.h"
 #include <conio.h>
 #include <ctype.h>
+#include "leaderboard.h"
+#include "equations.h"
+
 
 #define MAX_ANSWER_SIZE 8
 #define RED "\033[0;31m"
@@ -75,7 +78,7 @@ int main()
        /*char equation[9];
        GameState game;*/
        char line[100];
-
+       char randEquation[MAX_EQUATION_LEN];
        char input[100];
        int i;
        int len;
@@ -88,7 +91,9 @@ int main()
               printf("1. Play Game\n");
               printf("2. Check Leaderboard\n");
               printf("3. Add New Equation\n");
-              printf("4. Exit\n");
+              printf("4. Check Equations\n");
+              printf("5. Get random function\n");
+              printf("6. Exit\n");
               printf("Selection: ");
 
               choice = _getch();
@@ -102,6 +107,7 @@ int main()
 
               case '2':
                      printf("\n--- Leaderboard ---\n");
+                     readLeaderboard();
                      break;
 
               case '3':
@@ -110,12 +116,23 @@ int main()
                      {
                             process_line(input);
                      }
-
+                     break;
+              
+              case '4':
+                     printf("\n--- Equations ---\n");
+                     displayAllEquations();
                      break;
 
-              case '4':
+              case '5': {
+
+                     getEquation(randEquation);
+                     printf("Getting random equation: %s\n", randEquation);         
+                     break;
+              }
+              case '6':
                      printf("Goodbye!\n");
                      return 0;
+
 
               default:
                      printf("Invalid choice. Please try again.\n");
