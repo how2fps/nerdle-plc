@@ -6,83 +6,32 @@
 #include "game_logic.h"
 #include "parser.h"
 #include "evaluator.h"
-#include <conio.h>
-#include <ctype.h>
 
 #define MAX_ANSWER_SIZE 8
-
-void get_aesthetic_input(char *buffer, int max_len)
-{
-       int current_len = 0;
-       char ch;
-       int i = 0;
-
-       memset(buffer, 0, max_len + 1);
-
-       while (1)
-       {
-              printf("\rEnter equation: ");
-
-              printf("%s", buffer);
-
-              for (i = 0; i < (max_len - current_len); i++)
-              {
-                     printf("_");
-              }
-
-              ch = _getch();
-
-              if (ch == '\r' || ch == '\n')
-              {
-                     if (current_len == max_len)
-                     {
-                            break;
-                     }
-                     continue;
-              }
-
-              if (ch == '\b')
-              {
-                     if (current_len > 0)
-                     {
-                            current_len--;
-                            buffer[current_len] = '\0';
-                     }
-              }
-              else if (current_len < max_len && isprint(ch))
-              {
-                     buffer[current_len] = ch;
-                     current_len++;
-                     buffer[current_len] = '\0';
-              }
-       }
-       printf("\n");
-}
 
 int main()
 {
        FILE *fp;
+       GameFSM *game;
+
+       /*load equation list from file here*/
+       char *equation;
+       char *guess;
+       int max_guesses = 6;
        int line_count = 0;
        int random_line;
        char line[100];
+
        char input[100];
+       char guess_input[MAX_ANSWER_SIZE + 3];
        int i;
        int len;
-       int ch;
-       char choice;
-       int running = 1;
-
-       /* game logic variables */
-       /* char equation[EQUATION_LEN + 1]; */
-       GameFSM *game;
-       GuessStatus status;
-       char *equation;
-       char *guess;
-       char guess_input[MAX_ANSWER_SIZE + 3];
        int guess_len;
-       int max_guesses = 6;
+       int ch;
+       int choice = 0;
+       int running = 1;
+       GuessStatus status;
 
-      
        while (running)
        {
               printf("\n=== MATH GAME MENU ===\n");
@@ -92,14 +41,16 @@ int main()
               printf("4. Exit\n");
               printf("Selection: ");
 
-              choice = _getch();
-              printf("%c\n", choice);
+              if (fgets(input, sizeof(input), stdin) == NULL)
+                     break;
+              choice = atoi(input);
 
               switch (choice)
               {
-              case '1':
-                      printf("\n--- Starting Game ---\n");
+              case 1:
+                     printf("\n--- Starting Game ---\n");
                      line_count = 0;
+                     /* Call your game logic here */
                      srand(time(NULL));
                      fp = read_file("equations.txt");
                      while (fgets(line, sizeof(line), fp))
@@ -117,7 +68,7 @@ int main()
                                    break;
                             }
                      }
-                     fclose(fp);                     
+                     fclose(fp);
 
                      len = strlen(line);
                      if (len > 0 && line[len - 1] == '\n')
@@ -134,6 +85,7 @@ int main()
 
                      strncpy(equation, line, len);
                      equation[len] = '\0';
+                     /* printf("%s\n", equation); */
 
                      game = create_game(equation, max_guesses, 0);
                      if (game == NULL || game->answer == NULL)
@@ -207,30 +159,34 @@ int main()
 
                      break;
 
-              case '2':
+              case 2:
                      printf("\n--- Leaderboard ---\n");
+                     /* Call leaderboard display function */
                      break;
 
-              case '3':
-                     get_aesthetic_input(input, EQUATION_LEN);
-                     if (validate_equation(input))
+              case 3:
+                     printf("\n--- Add New Equation ---\n");
+                     printf("Enter equation (e.g., 5+2=7): ");
+                     if (fgets(input, sizeof(input), stdin) != NULL)
                      {
+                            /* Strip the newline character if present */
+                            input[strcspn(input, "\n")] = 0;
                             process_line(input);
                      }
-
                      break;
 
-              case '4':
+              case 4:
                      printf("Goodbye!\n");
-                     return 0;
+                     running = 0;
+                     break;
 
               default:
                      printf("Invalid choice. Please try again.\n");
                      break;
               }
-
        }
 
+       
 
        return 0;
 }
