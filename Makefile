@@ -5,9 +5,9 @@ SRC_DIR = src
 # Add all your object files here
 OFILES = main.o game_logic.o file_reader.o evaluator.o tokenizer.o parser.o
 
-nerdle: $(OFILES)
-	$(CC) $(OFILES) -o nerdle
-
+nerdle.exe: $(OFILES)
+	$(CC) $(OFILES) -o nerdle.exe
+	
 # Main needs access to game_logic and evaluator (for process_line)
 main.o: $(SRC_DIR)/main.c $(SRC_DIR)/game_logic.h $(SRC_DIR)/evaluator.h
 	$(CC) $(CFLAGS) -c $(SRC_DIR)/main.c
