@@ -6,8 +6,30 @@
 #include "game_logic.h"
 #include "parser.h"
 #include "evaluator.h"
-#include <conio.h>
 #include <ctype.h>
+
+#ifdef _WIN32
+#include <conio.h>
+#define getch _getch
+#else
+#include <stdio.h>
+#include <termios.h>
+#include <unistd.h>
+
+int getch(void)
+{
+       struct termios oldt, newt;
+       int ch;
+       tcgetattr(STDIN_FILENO, &oldt);
+       newt = oldt;
+       newt.c_lflag &= ~(ICANON | ECHO);
+       tcsetattr(STDIN_FILENO, TCSANOW, &newt);
+       ch = getchar();
+       tcsetattr(STDIN_FILENO, TCSANOW, &oldt);
+       return ch;
+}
+
+#endif
 
 #define MAX_ANSWER_SIZE 8
 
@@ -30,7 +52,7 @@ void get_aesthetic_input(char *buffer, int max_len)
                      printf("_");
               }
 
-              ch = _getch();
+              ch = getch();
 
               if (ch == '\r' || ch == '\n')
               {
@@ -82,7 +104,6 @@ int main()
        int guess_len;
        int max_guesses = 6;
 
-      
        while (running)
        {
               printf("\n=== MATH GAME MENU ===\n");
@@ -92,13 +113,13 @@ int main()
               printf("4. Exit\n");
               printf("Selection: ");
 
-              choice = _getch();
+              choice = getch();
               printf("%c\n", choice);
 
               switch (choice)
               {
               case '1':
-                      printf("\n--- Starting Game ---\n");
+                     printf("\n--- Starting Game ---\n");
                      line_count = 0;
                      srand(time(NULL));
                      fp = read_file("equations.txt");
@@ -117,7 +138,7 @@ int main()
                                    break;
                             }
                      }
-                     fclose(fp);                     
+                     fclose(fp);
 
                      len = strlen(line);
                      if (len > 0 && line[len - 1] == '\n')
@@ -153,7 +174,7 @@ int main()
 
                      printf("Start guessing!\n");
                      while (get_guesses_left(game) > 0 && is_game_won(game) != 1)
-                     {      
+                     {
                             printf("Your guess: ");
                             if (fgets(guess_input, sizeof(guess_input), stdin) == NULL)
                             {
@@ -228,9 +249,7 @@ int main()
                      printf("Invalid choice. Please try again.\n");
                      break;
               }
-
        }
-
 
        return 0;
 }
