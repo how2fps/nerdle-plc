@@ -236,9 +236,46 @@ int main()
                      get_aesthetic_input(input, EQUATION_LEN);
                      if (validate_equation(input))
                      {
-                            process_line(input);
-                     }
+                            int duplicate = 0;
+                            char file_line[100];
+                            fp = fopen("equations.txt", "r");
+                            if (fp != NULL)
+                            {
+                                   while (fgets(file_line, sizeof(file_line), fp))
+                                   {
+                                          /* strip newline */
+                                          file_line[strcspn(file_line, "\n")] = '\0';
+                                          if (strcmp(file_line, input) == 0)
+                                          {
+                                                 duplicate = 1;
+                                                 break;
+                                          }
+                                   }
+                                   fclose(fp);
+                            }
 
+                            if (duplicate)
+                            {
+                                   printf("Equation already exists!\n");
+                            }
+                            else
+                            {
+                                   fp = fopen("equations.txt", "a");
+                                   if (fp == NULL)
+                                   {
+                                          printf("Error: Could not open equations.txt\n");
+                                          break;
+                                   }
+                                   fprintf(fp, "%s\n", input);
+                                   fclose(fp);
+                                   printf("Equation added!\n");
+                                   process_line(input);
+                            }
+                     }
+                     else
+                     {
+                            printf("Invalid equation. Not added.\n");
+                     }
                      break;
 
               case '4':
