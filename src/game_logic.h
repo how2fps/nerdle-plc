@@ -42,10 +42,24 @@ typedef enum
         VALIDATION_OK
 } ValidationStatus;
 
+typedef enum
+{
+        WRONG,
+        PARTIAL,
+        CORRECT
+} SlotState;
+
+typedef struct{
+        char character;
+        int correct_position;
+} SlotInput;
 
 typedef struct LeGameFSM{
         GameState current_state;
+        SlotState *current_guess;
+        char *current_guess_str;
         char *answer;
+        int freq[256];
         int max_guesses;
         int guesses_used;
         int has_won;
@@ -62,18 +76,6 @@ const char *game_state_to_string(GameState state);
 
 void transition_gamestate(GameFSM *game, GameEvent event);
 ValidationStatus validate_guess(GameFSM *game, const char *guess);
-
-typedef enum
-{
-        WRONG,
-        PARTIAL,
-        CORRECT
-} SlotState;
-
-typedef struct{
-        int in_answer;
-        int correct_position;
-} SlotInput;
 
 SlotState *evaluate_guess(GameFSM *game, const char *guess);
 

@@ -1,5 +1,5 @@
 CC = gcc
-CFLAGS = -ansi -pedantic -Wall -Werror -g
+CFLAGS = -ansi -pedantic -Wall -Werror -g -I./include
 SRC_DIR = src
 
 # Add all your object files here
