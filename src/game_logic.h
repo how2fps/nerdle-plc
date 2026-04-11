@@ -39,29 +39,9 @@ typedef enum
         VALIDATION_NULL_INPUT,
         VALIDATION_WRONG_LENGTH,
         VALIDATION_BAD_EQUATION,
+        VALIDATION_REPEAT_EQUATION,
         VALIDATION_OK
 } ValidationStatus;
-
-
-typedef struct LeGameFSM{
-        GameState current_state;
-        char *answer;
-        int max_guesses;
-        int guesses_used;
-        int has_won;
-        void (*print)(struct LeGameFSM *);
-} GameFSM;
-
-void print(GameFSM *);
-
-GameFSM *create_game(char *target_equation, int guesses, int initial_has_won);
-void destroy_game(GameFSM *game);
-int get_guesses_left(const GameFSM *game);
-int is_game_won(const GameFSM *game);
-const char *game_state_to_string(GameState state);
-
-void transition_gamestate(GameFSM *game, GameEvent event);
-ValidationStatus validate_guess(GameFSM *game, const char *guess);
 
 typedef enum
 {
@@ -75,12 +55,29 @@ typedef struct{
         int correct_position;
 } SlotInput;
 
+typedef struct LeGameFSM{
+        GameState current_state;
+        char *answer;
+        int max_guesses;
+        int guesses_used;
+        char **guess_history;
+        SlotState **feedback_history;
+        int has_won;
+        void (*print)(struct LeGameFSM *);
+} GameFSM;
+
+void print(GameFSM *);
+GameFSM *create_game(char *target_equation, int guesses, int initial_has_won);
+void destroy_game(GameFSM *game);
+int get_guesses_left(const GameFSM *game);
+int is_game_won(const GameFSM *game);
+const char *game_state_to_string(GameState state);
+void transition_gamestate(GameFSM *game, GameEvent event);
+ValidationStatus validate_guess(GameFSM *game, const char *guess);
 SlotState *evaluate_guess(GameFSM *game, const char *guess);
-
 void game_result(GameFSM *game, const char *guess, const SlotState *feedback);
-
-void print_round_status(GameFSM *game);
+void print_guess_board(const GameFSM *game);
+void print_turn_status(GameFSM *game);
 GuessStatus play_guess_turn(GameFSM *game, const char *guess);
-
 
 #endif

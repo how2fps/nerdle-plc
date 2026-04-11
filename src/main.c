@@ -152,6 +152,7 @@ int main()
                      }
 
                      printf("Start guessing!\n");
+                     print_guess_board(game);
                      while (get_guesses_left(game) > 0 && is_game_won(game) != 1)
                      {      
                             printf("Your guess: ");

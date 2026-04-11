@@ -23,6 +23,7 @@ void print(GameFSM *this)
 
 GameFSM *create_game(char *target_equation, int max_guesses, int initial_has_won)
 {
+       int i;
        GameFSM *g = malloc(sizeof(GameFSM));
        if (g == NULL)
        {
@@ -39,6 +40,37 @@ GameFSM *create_game(char *target_equation, int max_guesses, int initial_has_won
        g->print = print;
        g->max_guesses = max_guesses;
        g->guesses_used = 0;
+       g->guess_history = malloc(sizeof(char *) * max_guesses);
+       g->feedback_history = malloc(sizeof(SlotState *) * max_guesses);
+
+       if (g->guess_history == NULL || g->feedback_history == NULL)
+       {
+              free(g->feedback_history);
+              free(g->guess_history);
+              free(g->answer);
+              free(g);
+              return NULL;
+       }
+       for (i = 0; i < max_guesses; i++)
+       {
+              g->guess_history[i] = malloc(sizeof(char) * (EQUATION_LEN + 1));
+              g->feedback_history[i] = malloc(sizeof(SlotState) * EQUATION_LEN);
+              if (g->guess_history[i] == NULL || g->feedback_history[i] == NULL)
+              {
+                     while (i >= 0)
+                     {
+                            free(g->guess_history[i]);
+                            free(g->feedback_history[i]);
+                            i--;
+                     }
+                     free(g->feedback_history);
+                     free(g->guess_history);
+                     free(g->answer);
+                     free(g);
+                     return NULL;
+              }
+              memset(g->guess_history[i], '\0', EQUATION_LEN + 1);
+       }
        if (initial_has_won == 1)
        {
               g->current_state = GAME_STATE_WON;
@@ -55,10 +87,23 @@ GameFSM *create_game(char *target_equation, int max_guesses, int initial_has_won
 
 void destroy_game(GameFSM *game)
 {
+       int i;
        if (game == NULL)
        {
               return;
        }
+
+       if (game->guess_history != NULL && game->feedback_history != NULL)
+       {
+              for (i = 0; i < game->max_guesses; i++)
+              {
+                     free(game->guess_history[i]);
+                     free(game->feedback_history[i]);
+              }
+       }
+
+       free(game->feedback_history);
+       free(game->guess_history);
 
        free(game->answer);
        free(game);
@@ -178,6 +223,8 @@ void transition_gamestate(GameFSM *fsm, GameEvent event)
 
 ValidationStatus validate_guess(GameFSM *game, const char *guess)
 {
+       int i;
+       
        if (game == NULL || guess == NULL)
        {
               if (game != NULL)
@@ -197,6 +244,13 @@ ValidationStatus validate_guess(GameFSM *game, const char *guess)
        {
               transition_gamestate(game, GAME_EVENT_VALIDATION_FAIL);
               return VALIDATION_BAD_EQUATION;
+       }
+
+       for(i = 0; i < game->guesses_used; i++){
+              if(!strcmp(guess, game->guess_history[i])){
+                     transition_gamestate(game, GAME_EVENT_VALIDATION_FAIL);
+                     return VALIDATION_REPEAT_EQUATION;
+              }
        }
 
        transition_gamestate(game, GAME_EVENT_VALIDATION_OK);
@@ -252,31 +306,28 @@ void game_result(GameFSM *game, const char *guess, const SlotState *feedback)
 {
        int i;
        int all_correct = 1;
+       int row;
 
        if (game == NULL || guess == NULL || feedback == NULL)
        {
               return;
        }
 
+       row = game->guesses_used;
+       if (row < game->max_guesses)
+       {
+              memcpy(game->guess_history[row], guess, EQUATION_LEN);
+              game->guess_history[row][EQUATION_LEN] = '\0';
+              memcpy(game->feedback_history[row], feedback, sizeof(SlotState) * EQUATION_LEN);
+       }
+
        for (i = 0; i < EQUATION_LEN; i++)
        {
-              if (feedback[i] == CORRECT)
+              if (feedback[i] != CORRECT)
               {
-                     printf(GREEN "%c" RESET, guess[i]);
-              }
-              else if (feedback[i] == PARTIAL)
-              {
-                     printf(YELLOW "%c" RESET, guess[i]);
                      all_correct = 0;
-              }
-              else
-              {
-                     printf(RED "%c" RESET, guess[i]);
-                     all_correct = 0;
-
               }
        }
-       printf("\n");
 
        if (get_guesses_left(game) > 0)
        {
@@ -302,8 +353,52 @@ void game_result(GameFSM *game, const char *guess, const SlotState *feedback)
        }
 }
 
-void print_round_status(GameFSM *game)
+void print_guess_board(const GameFSM *game)
 {
+       int row;
+       int col;
+
+       if (game == NULL)
+       {
+              return;
+       }
+
+       printf("\n");
+       for (row = 0; row < game->max_guesses; row++)
+       {
+              if (row < game->guesses_used)
+              {
+                     for (col = 0; col < EQUATION_LEN; col++)
+                     {
+                            if (game->feedback_history[row][col] == CORRECT)
+                            {
+                                   printf("[" GREEN "%c" RESET "]", game->guess_history[row][col]);
+                            }
+                            else if (game->feedback_history[row][col] == PARTIAL)
+                            {
+                                   printf("[" YELLOW "%c" RESET "]", game->guess_history[row][col]);
+                            }
+                            else
+                            {
+                                   printf("[" RED "%c" RESET "]", game->guess_history[row][col]);
+                            }
+                     }
+              }
+              else
+              {
+                     for (col = 0; col < EQUATION_LEN; col++)
+                     {
+                            printf("[_]");
+                     }
+              }
+              printf("\n");
+       }
+       printf("\n");
+}
+
+void print_turn_status(GameFSM *game)
+{
+       print_guess_board(game);
        if (is_game_won(game) == 1)
        {
               printf("You got the answer!\n");
@@ -353,6 +448,10 @@ GuessStatus play_guess_turn(GameFSM *game, const char *guess)
               {
                      printf("Invalid equation! Try again.\n\n");
               }
+              else if (validation_status == VALIDATION_REPEAT_EQUATION)
+              {
+                     printf("Equation already guessed!\n\n");
+              }
               else
               {
                      printf("Invalid input. Try again.\n\n");
@@ -370,8 +469,9 @@ GuessStatus play_guess_turn(GameFSM *game, const char *guess)
        game_result(game, guess, feedback); 
        /* game_result() transitions fsm to GAME_STATE_WON, GAME_STATE_LOST,
         or back to GAME_STATE_INPUT on win, lose and guesses left > 0 respectively */
+
        free(feedback);
-       print_round_status(game);
+       print_turn_status(game);
 
        if (is_game_won(game) == 1)
        {
