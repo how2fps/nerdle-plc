@@ -10,6 +10,6 @@ int evaluate_expression(Token tokens[EQUATION_LEN + 1]);
 
 int evaluate_string(const char *buf, int len, double *result);
 
-int process_line(char *line);
+int process_line(char *line, int print_message);
 
 #endif

@@ -120,7 +120,7 @@ int evaluate_string(const char *buf, int len, double *result)
        return 0;
 }
 
-int process_line(char *line)
+int process_line(char *line, int print_message)
 {
        char *line_copy = strdup(line);
        char *equals_ptr = strchr(line_copy, '=');
@@ -139,12 +139,18 @@ int process_line(char *line)
 
               if (left_val == right_val)
               {
-                     printf("Correct! LHS: %s=%.0f == RHS: %.0f\n", lhs_str, left_val, right_val);
+                     if (print_message)
+                     {
+                            printf("Correct! LHS: %s=%.0f == RHS: %.0f\n", lhs_str, left_val, right_val);
+                     }
                      result = 1;
               }
               else
               {
-                     printf("Rejected: LHS: %s=%.0f but RHS: %.0f\n", lhs_str, left_val, right_val);
+                     if (print_message)
+                     {
+                            printf("Rejected: LHS: %s=%.0f but RHS: %.0f\n", lhs_str, left_val, right_val);
+                     }
                      result = 0;
               }
        }
