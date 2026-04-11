@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include "evaluator.h"
 #include "game_logic.h"
 #include "parser.h"
 
@@ -202,7 +203,7 @@ ValidationStatus validate_guess(GameFSM *game, const char *guess)
               return VALIDATION_WRONG_LENGTH;
        }
 
-       if (validate_equation(guess) == 0)
+       if (validate_equation(guess) == 0 || process_line((char *)guess) == 0)
        {
               transition_gamestate(game, GAME_EVENT_VALIDATION_FAIL);
               return VALIDATION_BAD_EQUATION;

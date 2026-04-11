@@ -234,7 +234,7 @@ int main(void)
 
               case '3':
                      get_aesthetic_input(input, EQUATION_LEN);
-                     if (validate_equation(input))
+                     if (validate_equation(input) && process_line(input))
                      {
                             int duplicate = 0;
                             char file_line[100];
@@ -243,7 +243,6 @@ int main(void)
                             {
                                    while (fgets(file_line, sizeof(file_line), fp))
                                    {
-                                          /* strip newline */
                                           file_line[strcspn(file_line, "\n")] = '\0';
                                           if (strcmp(file_line, input) == 0)
                                           {
@@ -269,7 +268,6 @@ int main(void)
                                    fprintf(fp, "%s\n", input);
                                    fclose(fp);
                                    printf("Equation added!\n");
-                                   process_line(input);
                             }
                      }
                      else

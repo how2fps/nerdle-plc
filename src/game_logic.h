@@ -84,5 +84,4 @@ void game_result(GameFSM *game, const char *guess, const SlotState *feedback);
 void print_round_status(GameFSM *game);
 GuessStatus play_guess_turn(GameFSM *game, const char *guess);
 
-
 #endif

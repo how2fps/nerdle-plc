@@ -109,43 +109,7 @@ int evaluate_expression(Token tokens[EQUATION_LEN + 1])
        return stack[top];
 }
 
-void process_line(char *line)
-{
-       char *equals_ptr;
-       char *expression;
-       char *expected_str;
-       int calculated_result;
-       int expected_result;
-       Token tokens[EQUATION_LEN + 1];
-       Token postfix[EQUATION_LEN + 1];
-
-       equals_ptr = strchr(line, '=');
-
-       if (equals_ptr != NULL)
-       {
-              *equals_ptr = '\0';
-
-              expression = line;
-              expected_str = equals_ptr + 1;
-
-              tokenize_expression(expression, tokens);
-              infix_to_postfix(tokens, postfix);
-              calculated_result = evaluate_expression(postfix);
-
-              expected_result = atoi(expected_str);
-
-              if (calculated_result == expected_result)
-              {
-                     printf("Correct! %d == %d\n", calculated_result, expected_result);
-              }
-              else
-              {
-                     printf("Wrong! Calculated %d, but expected %d\n", calculated_result, expected_result);
-              }
-       }
-}
-
-int evaluate_lhs(const char *buf, int len, double *result)
+int evaluate_string(const char *buf, int len, double *result)
 {
        Token infix[EQUATION_LEN + 1];
        Token postfix[EQUATION_LEN + 1];
@@ -154,4 +118,36 @@ int evaluate_lhs(const char *buf, int len, double *result)
        infix_to_postfix(infix, postfix);
        *result = (double)evaluate_expression(postfix);
        return 0;
+}
+
+int process_line(char *line)
+{
+       char *line_copy = strdup(line);
+       char *equals_ptr = strchr(line_copy, '=');
+       char *lhs_str, *rhs_str;
+       double left_val, right_val;
+       int result = 0;
+
+       if (equals_ptr != NULL)
+       {
+              *equals_ptr = '\0';
+              lhs_str = line_copy;
+              rhs_str = equals_ptr + 1;
+
+              evaluate_string(lhs_str, strlen(lhs_str), &left_val);
+              evaluate_string(rhs_str, strlen(rhs_str), &right_val);
+
+              if (left_val == right_val)
+              {
+                     printf("Correct! LHS: %s=%.0f == RHS: %.0f\n", lhs_str, left_val, right_val);
+                     result = 1;
+              }
+              else
+              {
+                     printf("Rejected: LHS: %s=%.0f but RHS: %.0f\n", lhs_str, left_val, right_val);
+                     result = 0;
+              }
+       }
+       free(line_copy);
+       return result;
 }
