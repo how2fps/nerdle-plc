@@ -6,8 +6,30 @@
 #include "game_logic.h"
 #include "parser.h"
 #include "evaluator.h"
-#include <conio.h>
 #include <ctype.h>
+
+#ifdef _WIN32
+#include <conio.h>
+#define getch _getch
+#else
+#include <stdio.h>
+#include <termios.h>
+#include <unistd.h>
+
+int getch(void)
+{
+       struct termios oldt, newt;
+       int ch;
+       tcgetattr(STDIN_FILENO, &oldt);
+       newt = oldt;
+       newt.c_lflag &= ~(ICANON | ECHO);
+       tcsetattr(STDIN_FILENO, TCSANOW, &newt);
+       ch = getchar();
+       tcsetattr(STDIN_FILENO, TCSANOW, &oldt);
+       return ch;
+}
+
+#endif
 
 #define MAX_ANSWER_SIZE 8
 
@@ -30,7 +52,7 @@ void get_aesthetic_input(char *buffer, int max_len)
                      printf("_");
               }
 
-              ch = _getch();
+              ch = getch();
 
               if (ch == '\r' || ch == '\n')
               {
@@ -91,7 +113,7 @@ int main(void)
               printf("4. Exit\n");
               printf("Selection: ");
 
-              choice = _getch();
+              choice = getch();
               printf("%c\n", choice);
 
               switch (choice)
@@ -214,9 +236,46 @@ int main(void)
                      get_aesthetic_input(input, EQUATION_LEN);
                      if (validate_equation(input))
                      {
-                            process_line(input);
-                     }
+                            int duplicate = 0;
+                            char file_line[100];
+                            fp = fopen("equations.txt", "r");
+                            if (fp != NULL)
+                            {
+                                   while (fgets(file_line, sizeof(file_line), fp))
+                                   {
+                                          /* strip newline */
+                                          file_line[strcspn(file_line, "\n")] = '\0';
+                                          if (strcmp(file_line, input) == 0)
+                                          {
+                                                 duplicate = 1;
+                                                 break;
+                                          }
+                                   }
+                                   fclose(fp);
+                            }
 
+                            if (duplicate)
+                            {
+                                   printf("Equation already exists!\n");
+                            }
+                            else
+                            {
+                                   fp = fopen("equations.txt", "a");
+                                   if (fp == NULL)
+                                   {
+                                          printf("Error: Could not open equations.txt\n");
+                                          break;
+                                   }
+                                   fprintf(fp, "%s\n", input);
+                                   fclose(fp);
+                                   printf("Equation added!\n");
+                                   process_line(input);
+                            }
+                     }
+                     else
+                     {
+                            printf("Invalid equation. Not added.\n");
+                     }
                      break;
 
               case '4':
