@@ -39,6 +39,7 @@ typedef enum
         VALIDATION_NULL_INPUT,
         VALIDATION_WRONG_LENGTH,
         VALIDATION_BAD_EQUATION,
+        VALIDATION_REPEAT_EQUATION,
         VALIDATION_OK
 } ValidationStatus;
 
@@ -57,6 +58,8 @@ typedef struct{
 typedef struct LeGameFSM{
         GameState current_state;
         SlotState *current_guess;
+        char **guess_history;
+        SlotState **feedback_history;
         char *current_guess_str;
         char *answer;
         int freq[256];
@@ -67,21 +70,15 @@ typedef struct LeGameFSM{
 } GameFSM;
 
 void print(GameFSM *);
-
 GameFSM *create_game(char *target_equation, int guesses, int initial_has_won);
 void destroy_game(GameFSM *game);
 int get_guesses_left(const GameFSM *game);
 int is_game_won(const GameFSM *game);
-const char *game_state_to_string(GameState state);
-
 void transition_gamestate(GameFSM *game, GameEvent event);
 ValidationStatus validate_guess(GameFSM *game, const char *guess);
-
 SlotState *evaluate_guess(GameFSM *game, const char *guess);
-
 void game_result(GameFSM *game, const char *guess, const SlotState *feedback);
-
-void print_round_status(GameFSM *game);
 GuessStatus play_guess_turn(GameFSM *game, const char *guess);
+const char *game_state_to_string(GameState state);
 
 #endif
