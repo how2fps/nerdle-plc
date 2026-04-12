@@ -187,7 +187,8 @@ int main(void)
                      }
                      
                      /* Delete later */
-                     printf("equation: %s\n", equation);
+/*                      printf("equation: %s\n", equation); */
+
                      printf("Start guessing!\n");
                      while (get_guesses_left(game) > 0 && is_game_won(game) != 1)
                      {
