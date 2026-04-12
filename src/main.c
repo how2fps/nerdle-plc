@@ -2,13 +2,35 @@
 #include <string.h>
 #include <stdlib.h>
 #include <time.h>
-#include <ctype.h>
 #include "file_reader.h"
 #include "game_logic.h"
-#include "game_ui.h"
 #include "parser.h"
 #include "evaluator.h"
-#include "conio.h"
+#include <ctype.h>
+#include "leaderboard.h"
+
+#ifdef _WIN32
+#include <conio.h>
+#define getch _getch
+#else
+#include <stdio.h>
+#include <termios.h>
+#include <unistd.h>
+
+int getch(void)
+{
+       struct termios oldt, newt;
+       int ch;
+       tcgetattr(STDIN_FILENO, &oldt);
+       newt = oldt;
+       newt.c_lflag &= ~(ICANON | ECHO);
+       tcsetattr(STDIN_FILENO, TCSANOW, &newt);
+       ch = getchar();
+       tcsetattr(STDIN_FILENO, TCSANOW, &oldt);
+       return ch;
+}
+
+#endif
 
 #define MAX_ANSWER_SIZE 8
 
@@ -67,6 +89,8 @@ int main(void)
        int random_line;
        char line[100];
        char input[100];
+       char name[MAX_NAME_LEN];
+       int score;
        int i;
        int len;
        int ch;
@@ -99,10 +123,20 @@ int main(void)
               switch (choice)
               {
               case '1':
-                     /* printf("\n--- Starting Game ---\n"); */
+                     score = 0;
+                     printf("\n--- Starting Game ---\n");
+                     printf("Enter your name: ");
+                     fgets(name, sizeof(name), stdin);
+                     name[strcspn(name, "\n")] = '\0';
+                     if (strlen(name) == 0)
+                     {
+                     strcpy(name, "Player");
+                     }
+                     printf("Player name: %s\n", name);
+                     
                      line_count = 0;
                      srand(time(NULL));
-                     fp = read_file("equations.txt");
+                     fp = read_file("../equations.txt");
                      while (fgets(line, sizeof(line), fp))
                      {
                             line_count++;
@@ -151,11 +185,13 @@ int main(void)
                             destroy_game(game);
                             return 1;
                      }
-
-                     enter_game_view();
-                     print_turn_status(game);
+                     
+                     /* Delete later */
+                     printf("equation: %s\n", equation);
+                     printf("Start guessing!\n");
                      while (get_guesses_left(game) > 0 && is_game_won(game) != 1)
                      {
+                            printf("Score: %d\n", score);
                             printf("Your guess: ");
                             if (fgets(guess_input, sizeof(guess_input), stdin) == NULL)
                             {
@@ -176,14 +212,14 @@ int main(void)
                                    continue;
                             }
 
-                            /* for users to return to main menu from selection 1 gracefully */
-                            if (!strcmp(guess_input, "q"))
-                            {
-                                   break;
-                            }
-
                             strncpy(guess, guess_input, MAX_ANSWER_SIZE);
                             guess[MAX_ANSWER_SIZE] = '\0';
+
+                            if (game->current_state == GAME_STATE_START)
+                            {
+                                   transition_gamestate(game, GAME_EVENT_INIT); /* to GAME_STATE_INPUT  */
+                            }
+                            transition_gamestate(game, GAME_EVENT_SUBMIT_GUESS); /* to GAME_STATE_VALIDATION  */
 
                             status = play_guess_turn(game, guess);
                             if (status == GUESS_INVALID)
@@ -196,17 +232,27 @@ int main(void)
                                    printf("Could not evaluate guess. Try again.\n");
                                    continue;
                             }
-
-                            print_turn_status(game);
+                            if (status == GUESS_CORRECT)
+                            {
+                                   score++;
+                                   printf("Score: %d\n", score);
+                                   continue;
+                            }
                      }
 
-                     if (is_game_won(game) == 1)
+                     if (is_game_won(game) != 1 && get_guesses_left(game) == 0)
                      {
-                            prompt_return_to_menu();
+                            printf("No guesses left. The answer was: %s\n", game->answer);
+                            if (score > 0)
+                            {
+                                   printf("Your final score: %d\n", score);
+                                   writeLeaderboard(name, score);    
+                            }
+                            else
+                            {
+                                   printf("Your final score was 0.\n");
+                            }
                      }
-
-                     leave_game_view();
-                     print_game_lost_result(game);
 
                      free(guess);
                      free(equation);
@@ -216,6 +262,7 @@ int main(void)
 
               case '2':
                      printf("\n--- Leaderboard ---\n");
+                     readLeaderboard();
                      break;
 
               case '3':
@@ -302,8 +349,7 @@ int main(void)
                             return 1;
                      }
 
-                     enter_game_view();
-                     print_turn_status(game);
+                     printf("Start guessing!\n");
                      while (get_guesses_left(game) > 0 && is_game_won(game) != 1)
                      {
                             printf("Your guess: ");
@@ -326,13 +372,14 @@ int main(void)
                                    continue;
                             }
 
-                            if (!strcmp(guess_input, "q"))
-                            {
-                                   break;
-                            }
-
                             strncpy(guess, guess_input, MAX_ANSWER_SIZE);
                             guess[MAX_ANSWER_SIZE] = '\0';
+
+                            if (game->current_state == GAME_STATE_START)
+                            {
+                                   transition_gamestate(game, GAME_EVENT_INIT); /* to GAME_STATE_INPUT  */
+                            }
+                            transition_gamestate(game, GAME_EVENT_SUBMIT_GUESS); /* to GAME_STATE_VALIDATION  */
 
                             status = play_guess_turn(game, guess);
                             if (status == GUESS_INVALID)
@@ -345,17 +392,12 @@ int main(void)
                                    printf("Could not evaluate guess. Try again.\n");
                                    continue;
                             }
-
-                            print_turn_status(game);
                      }
 
-                     if (is_game_won(game) == 1)
+                     if (is_game_won(game) != 1 && get_guesses_left(game) == 0)
                      {
-                            prompt_return_to_menu();
+                            printf("No guesses left. The answer was: %s\n", game->answer);
                      }
-
-                     leave_game_view();
-                     print_game_lost_result(game);
 
                      free(guess);
                      free(equation);
