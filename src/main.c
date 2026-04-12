@@ -92,7 +92,11 @@ int main(void)
        char line[100];
        char input[100];
        char name[MAX_NAME_LEN];
-       int score;
+       time_t game_start;
+       time_t game_end;
+       int total_seconds;
+       int minutes;
+       int seconds;
        int i;
        int len;
        int ch;
@@ -126,7 +130,6 @@ int main(void)
               switch (choice)
               {
               case '1':
-                     score = 0;
                      printf("\n--- Starting Game ---\n");
                      printf("Enter your name: ");
                      fgets(name, sizeof(name), stdin);
@@ -194,6 +197,7 @@ int main(void)
                             return 1;
                      }
 
+                     game_start = time(NULL);
                      enter_game_view();
                      print_guess_board(game);
 
@@ -241,26 +245,21 @@ int main(void)
                                    continue;
                             }
 
-                            if (status == GUESS_CORRECT)
-                            {
-                                   score++;
-                            }
-
                             print_turn_status(game);
                      }
 
                      if (is_game_won(game) == 1)
                      {
-                            printf("You won! Final score: %d\n", score);
-                            writeLeaderboard(name, score);
+                            game_end = time(NULL);
+                            total_seconds = (int)difftime(game_end, game_start);
+                            minutes = total_seconds / 60;
+                            seconds = total_seconds % 60;
+                            printf("Total time taken: %02d:%02d\n", minutes, seconds);
+                            writeLeaderboard(name, minutes, seconds);
                      }
                      else if (get_guesses_left(game) == 0)
                      {
                             print_game_lost_result(game);
-                            if (score > 0)
-                            {
-                                   writeLeaderboard(name, score);
-                            }
                      }
 
                      save_replay(game);
