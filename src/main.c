@@ -8,6 +8,7 @@
 #include "evaluator.h"
 #include <ctype.h>
 #include "leaderboard.h"
+#include "game_ui.h"
 
 #ifdef _WIN32
 #include <conio.h>
@@ -90,7 +91,11 @@ int main(void)
        char line[100];
        char input[100];
        char name[MAX_NAME_LEN];
-       int score;
+       time_t game_start;
+       time_t game_end;
+       int total_seconds;
+       int minutes;
+       int seconds;
        int i;
        int len;
        int ch;
@@ -123,7 +128,6 @@ int main(void)
               switch (choice)
               {
               case '1':
-                     score = 0;
                      printf("\n--- Starting Game ---\n");
                      printf("Enter your name: ");
                      fgets(name, sizeof(name), stdin);
@@ -137,6 +141,11 @@ int main(void)
                      line_count = 0;
                      srand(time(NULL));
                      fp = read_file("../equations.txt");
+                     if (fp == NULL)
+                     {
+                            printf("Error: Could not open equations.txt\n");
+                            break;
+                     }
                      while (fgets(line, sizeof(line), fp))
                      {
                             line_count++;
@@ -186,13 +195,12 @@ int main(void)
                             return 1;
                      }
                      
-                     /* Delete later */
-/*                      printf("equation: %s\n", equation); */
+                     game_start = time(NULL);
+                     enter_game_view();
+                     print_guess_board(game);
 
-                     printf("Start guessing!\n");
                      while (get_guesses_left(game) > 0 && is_game_won(game) != 1)
                      {
-                            printf("Score: %d\n", score);
                             printf("Your guess: ");
                             if (fgets(guess_input, sizeof(guess_input), stdin) == NULL)
                             {
@@ -225,6 +233,7 @@ int main(void)
                             status = play_guess_turn(game, guess);
                             if (status == GUESS_INVALID)
                             {
+                                   print_guess_board(game);
                                    continue;
                             }
 
@@ -233,27 +242,26 @@ int main(void)
                                    printf("Could not evaluate guess. Try again.\n");
                                    continue;
                             }
-                            if (status == GUESS_CORRECT)
-                            {
-                                   score++;
-                                   printf("Score: %d\n", score);
-                                   continue;
-                            }
+
+                            print_turn_status(game);
                      }
 
-                     if (is_game_won(game) != 1 && get_guesses_left(game) == 0)
+                     if (is_game_won(game) == 1)
                      {
-                            printf("No guesses left. The answer was: %s\n", game->answer);
-                            if (score > 0)
-                            {
-                                   printf("Your final score: %d\n", score);
-                                   writeLeaderboard(name, score);    
-                            }
-                            else
-                            {
-                                   printf("Your final score was 0.\n");
-                            }
+                            game_end = time(NULL);
+                            total_seconds = (int)difftime(game_end, game_start);
+                            minutes = total_seconds / 60;
+                            seconds = total_seconds % 60;
+                            printf("Total time taken: %02d:%02d\n", minutes, seconds);
+                            writeLeaderboard(name, minutes, seconds);
                      }
+                     else if (get_guesses_left(game) == 0)
+                     {
+                            print_game_lost_result(game);
+                     }
+
+                     prompt_return_to_menu();
+                     leave_game_view();
 
                      free(guess);
                      free(equation);
@@ -333,7 +341,6 @@ int main(void)
                      strncpy(equation, input, len);
                      equation[len] = '\0';
 
-                     printf("\033[H\033[J");
                      game = create_game(equation, max_guesses, 0);
                      if (game == NULL || game->answer == NULL)
                      {
@@ -350,7 +357,9 @@ int main(void)
                             return 1;
                      }
 
-                     printf("Start guessing!\n");
+                     enter_game_view();
+                     print_guess_board(game);
+
                      while (get_guesses_left(game) > 0 && is_game_won(game) != 1)
                      {
                             printf("Your guess: ");
@@ -385,6 +394,7 @@ int main(void)
                             status = play_guess_turn(game, guess);
                             if (status == GUESS_INVALID)
                             {
+                                   print_guess_board(game);
                                    continue;
                             }
 
@@ -393,12 +403,21 @@ int main(void)
                                    printf("Could not evaluate guess. Try again.\n");
                                    continue;
                             }
+
+                            print_turn_status(game);
                      }
 
-                     if (is_game_won(game) != 1 && get_guesses_left(game) == 0)
+                     if (is_game_won(game) == 1)
                      {
-                            printf("No guesses left. The answer was: %s\n", game->answer);
+                            printf("You won!\n");
                      }
+                     else if (get_guesses_left(game) == 0)
+                     {
+                            print_game_lost_result(game);
+                     }
+
+                     prompt_return_to_menu();
+                     leave_game_view();
 
                      free(guess);
                      free(equation);

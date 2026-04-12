@@ -7,7 +7,8 @@
 
 typedef struct {
     char name[MAX_NAME_LEN];
-    int  score;
+    int minutes;
+    int seconds;
     char date[12];   /* "DD/MM/YYYY\0" */
     char time[12];   /* "HH:MM:SS\0"  */
 } LeaderboardEntry;
@@ -15,6 +16,6 @@ typedef struct {
 /* Leaderboard functions */
 int loadLeaderboard(LeaderboardEntry entries[], int maxEntries);
 void readLeaderboard(void);
-int writeLeaderboard(const char *name, int score);
+int writeLeaderboard(const char *name, int minutes, int seconds);
 
 #endif
