@@ -11,7 +11,6 @@ void print(GameFSM *this)
               return;
        }
        printf("--- Nerdle Game State ---\n");
-       printf("Target: %s\n", this->answer);
        printf("Guesses Left: %d\n", get_guesses_left(this));
        printf("-------------------------\n");
 }
@@ -282,62 +281,6 @@ void game_result(GameFSM *game, const char *guess, const SlotState *feedback)
        }
 }
 
-void print_guess_board(const GameFSM *game)
-{
-       int row;
-       int col;
-
-       if (game == NULL)
-       {
-              return;
-       }
-
-       printf("\n");
-       for (row = 0; row < game->max_guesses; row++)
-       {
-              if (row < game->guesses_used)
-              {
-                     for (col = 0; col < EQUATION_LEN; col++)
-                     {
-                            if (game->feedback_history[row][col] == CORRECT)
-                            {
-                                   printf("[" GREEN "%c" RESET "]", game->guess_history[row][col]);
-                            }
-                            else if (game->feedback_history[row][col] == PARTIAL)
-                            {
-                                   printf("[" YELLOW "%c" RESET "]", game->guess_history[row][col]);
-                            }
-                            else
-                            {
-                                   printf("[" RED "%c" RESET "]", game->guess_history[row][col]);
-                            }
-                     }
-              }
-              else
-              {
-                     for (col = 0; col < EQUATION_LEN; col++)
-                     {
-                            printf("[_]");
-                     }
-              }
-              printf("\n");
-       }
-       printf("\n");
-}
-
-void print_turn_status(GameFSM *game)
-{
-       print_guess_board(game);
-       if (is_game_won(game) == 1)
-       {
-              printf("You got the answer!\n");
-       }
-       else
-       {
-              printf("Guesses left: %d\n\n", get_guesses_left(game));
-       }
-}
-
 /* "main" function of game logic */
 GuessStatus play_guess_turn(GameFSM *game, const char *guess)
 {
@@ -400,7 +343,6 @@ GuessStatus play_guess_turn(GameFSM *game, const char *guess)
         or back to GAME_STATE_INPUT on win, lose and guesses left > 0 respectively */
 
        free(feedback);
-       print_turn_status(game);
 
        if (is_game_won(game) == 1)
        {

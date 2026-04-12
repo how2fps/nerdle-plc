@@ -2,10 +2,6 @@
 #define GAME_LOGIC_H
 
 #define EQUATION_LEN 8
-#define RED "\033[0;31m"
-#define GREEN "\033[0;32m"
-#define YELLOW "\033[0;33m"
-#define RESET "\033[0m"
 
 typedef enum
 {
@@ -79,8 +75,6 @@ void transition_gamestate(GameFSM *game, GameEvent event);
 ValidationStatus validate_guess(GameFSM *game, const char *guess);
 SlotState *evaluate_guess(GameFSM *game, const char *guess);
 void game_result(GameFSM *game, const char *guess, const SlotState *feedback);
-void print_guess_board(const GameFSM *game);
-void print_turn_status(GameFSM *game);
 GuessStatus play_guess_turn(GameFSM *game, const char *guess);
 const char *game_state_to_string(GameState state);
 

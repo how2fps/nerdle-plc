@@ -4,6 +4,7 @@
 #include <time.h>
 #include "file_reader.h"
 #include "game_logic.h"
+#include "game_ui.h"
 #include "parser.h"
 #include "evaluator.h"
 #include <conio.h>
@@ -151,8 +152,8 @@ int main()
                             return 1;
                      }
 
-                     printf("Start guessing!\n");
-                     print_guess_board(game);
+                     enter_game_view();
+                     print_turn_status(game);
                      while (get_guesses_left(game) > 0 && is_game_won(game) != 1)
                      {      
                             printf("Your guess: ");
@@ -178,12 +179,6 @@ int main()
                             strncpy(guess, guess_input, MAX_ANSWER_SIZE);
                             guess[MAX_ANSWER_SIZE] = '\0';
 
-                            if (game->current_state == GAME_STATE_START)
-                            {
-                                   transition_gamestate(game, GAME_EVENT_INIT); /* to GAME_STATE_INPUT  */
-                            }
-                            transition_gamestate(game, GAME_EVENT_SUBMIT_GUESS); /* to GAME_STATE_VALIDATION  */
-
                             status = play_guess_turn(game, guess);
                             if (status == GUESS_INVALID)
                             {
@@ -195,12 +190,17 @@ int main()
                                    printf("Could not evaluate guess. Try again.\n");
                                    continue;
                             }
+
+                            print_turn_status(game);
                      }
 
-                     if (is_game_won(game) != 1 && get_guesses_left(game) == 0)
+                     if (is_game_won(game) == 1)
                      {
-                            printf("No guesses left. The answer was: %s\n", game->answer);
+                            prompt_return_to_menu();
                      }
+
+                     leave_game_view();
+                     print_game_lost_result(game);
 
                      free(guess);
                      free(equation);
