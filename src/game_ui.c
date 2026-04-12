@@ -1,5 +1,5 @@
 #include <stdio.h>
-#include <conio.h>
+#include "conio.h"
 #include "game_ui.h"
 
 void enter_game_view(void)
@@ -26,7 +26,7 @@ void print_guess_board(const GameFSM *game)
 
        printf("\033[H\033[J");
        printf("Target equation (for debugging): %s\n", game->answer);
-       printf("========= NERDLE ========\n");
+       printf("======== NERDLE ========\n");
        for (row = 0; row < game->max_guesses; row++)
        {
               if (row < game->guesses_used)
@@ -76,7 +76,7 @@ void print_turn_status(const GameFSM *game)
 void prompt_return_to_menu(void)
 {
        printf("Press any key to return to menu...\n");
-       _getch();
+       getch();
 }
 
 void print_game_lost_result(const GameFSM *game)
