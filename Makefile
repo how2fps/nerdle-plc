@@ -2,10 +2,8 @@ CC = gcc
 CFLAGS = -ansi -pedantic -Wall -Werror -g -I./include
 SRC_DIR = src
 
-# 1. Using OBJS consistently
 OBJS = main.o game_logic.o game_ui.o file_reader.o evaluator.o tokenizer.o parser.o leaderboard.o
 
-# 2. Changed $(OFILES) to $(OBJS)
 nerdle: $(OBJS)
 	$(CC) $(OBJS) -o nerdle
 
@@ -30,7 +28,6 @@ tokenizer.o: $(SRC_DIR)/tokenizer.c
 parser.o: $(SRC_DIR)/parser.c
 	$(CC) $(CFLAGS) -c $(SRC_DIR)/parser.c
 
-# 3. Added the missing leaderboard rule
 leaderboard.o: $(SRC_DIR)/leaderboard.c
 	$(CC) $(CFLAGS) -c $(SRC_DIR)/leaderboard.c
 

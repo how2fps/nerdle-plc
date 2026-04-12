@@ -3,7 +3,6 @@
 
 #ifdef _WIN32
     #include <conio.h>
-    /* Manual prototype to satisfy -Werror=implicit-function-declaration */
     int _getch(void); 
     #define getch _getch
 #else
