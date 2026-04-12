@@ -9,6 +9,7 @@
 #include <ctype.h>
 #include "leaderboard.h"
 #include "game_ui.h"
+#include "replay.h"
 
 #ifdef _WIN32
 #include <conio.h>
@@ -115,7 +116,8 @@ int main(void)
               printf("2. Check Leaderboard\n");
               printf("3. Add New Equation\n");
               printf("4. Challenge Mode\n");
-              printf("5. Exit\n");
+              printf("5. Watch Replay\n");
+              printf("6. Exit\n");
               printf("Selection: ");
 
               choice = getch();
@@ -131,10 +133,10 @@ int main(void)
                      name[strcspn(name, "\n")] = '\0';
                      if (strlen(name) == 0)
                      {
-                     strcpy(name, "Player");
+                            strcpy(name, "Player");
                      }
                      printf("Player name: %s\n", name);
-                     
+
                      line_count = 0;
                      srand(time(NULL));
                      fp = read_file("equations.txt");
@@ -191,7 +193,7 @@ int main(void)
                             destroy_game(game);
                             return 1;
                      }
-                     
+
                      enter_game_view();
                      print_guess_board(game);
 
@@ -261,6 +263,7 @@ int main(void)
                             }
                      }
 
+                     save_replay(game);
                      prompt_return_to_menu();
                      leave_game_view();
 
@@ -417,6 +420,7 @@ int main(void)
                             print_game_lost_result(game);
                      }
 
+                     save_replay(name, game);
                      prompt_return_to_menu();
                      leave_game_view();
 
@@ -427,8 +431,14 @@ int main(void)
                      break;
 
               case '5':
+                     printf("\n--- Watch Replay ---\n");
+                     // play_replay();
+                     break;
+
+              case '6':
                      printf("Goodbye!\n");
-                     return 0;
+                     running = 0;
+                     break;
 
               default:
                      printf("Invalid choice. Please try again.\n");

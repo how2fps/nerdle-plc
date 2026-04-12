@@ -2,7 +2,7 @@ CC = gcc
 CFLAGS = -ansi -pedantic -Wall -Werror -g -I./include
 SRC_DIR = src
 
-OBJS = main.o game_logic.o game_ui.o file_reader.o evaluator.o tokenizer.o parser.o leaderboard.o
+OBJS = main.o game_logic.o game_ui.o file_reader.o evaluator.o tokenizer.o parser.o leaderboard.o replay.o
 
 nerdle: $(OBJS)
 	$(CC) $(OBJS) -o nerdle
@@ -30,6 +30,9 @@ parser.o: $(SRC_DIR)/parser.c
 
 leaderboard.o: $(SRC_DIR)/leaderboard.c
 	$(CC) $(CFLAGS) -c $(SRC_DIR)/leaderboard.c
+
+replay.o: $(SRC_DIR)/replay.c
+	$(CC) $(CFLAGS) -c $(SRC_DIR)/replay.c
 
 .PHONY: clean
 clean:
