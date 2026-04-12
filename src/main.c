@@ -140,7 +140,7 @@ int main(void)
                      
                      line_count = 0;
                      srand(time(NULL));
-                     fp = read_file("../equations.txt");
+                     fp = read_file("equations.txt");
                      if (fp == NULL)
                      {
                             printf("Error: Could not open equations.txt\n");

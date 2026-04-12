@@ -2,35 +2,35 @@ CC = gcc
 CFLAGS = -ansi -pedantic -Wall -Werror -g -I./include
 SRC_DIR = src
 
-# Add all your object files here
-OFILES = main.o game_logic.o game_ui.o file_reader.o evaluator.o tokenizer.o parser.o
+OBJS = main.o game_logic.o game_ui.o file_reader.o evaluator.o tokenizer.o parser.o leaderboard.o
 
-nerdle: $(OFILES)
-	$(CC) $(OFILES) -o nerdle
+nerdle: $(OBJS)
+	$(CC) $(OBJS) -o nerdle
 
-# Main needs access to game_logic and evaluator (for process_line)
-main.o: $(SRC_DIR)/main.c $(SRC_DIR)/game_logic.h $(SRC_DIR)/game_ui.h $(SRC_DIR)/evaluator.h
+main.o: $(SRC_DIR)/main.c
 	$(CC) $(CFLAGS) -c $(SRC_DIR)/main.c
 
-game_logic.o: $(SRC_DIR)/game_logic.c $(SRC_DIR)/game_logic.h
+game_logic.o: $(SRC_DIR)/game_logic.c
 	$(CC) $(CFLAGS) -c $(SRC_DIR)/game_logic.c
 
-game_ui.o: $(SRC_DIR)/game_ui.c $(SRC_DIR)/game_ui.h $(SRC_DIR)/game_logic.h
+game_ui.o: $(SRC_DIR)/game_ui.c
 	$(CC) $(CFLAGS) -c $(SRC_DIR)/game_ui.c
 
-file_reader.o: $(SRC_DIR)/file_reader.c $(SRC_DIR)/file_reader.h
+file_reader.o: $(SRC_DIR)/file_reader.c
 	$(CC) $(CFLAGS) -c $(SRC_DIR)/file_reader.c
 
-# These are the new rules for your math engine
-evaluator.o: $(SRC_DIR)/evaluator.c $(SRC_DIR)/evaluator.h $(SRC_DIR)/tokenizer.h
+evaluator.o: $(SRC_DIR)/evaluator.c
 	$(CC) $(CFLAGS) -c $(SRC_DIR)/evaluator.c
 
-tokenizer.o: $(SRC_DIR)/tokenizer.c $(SRC_DIR)/tokenizer.h
+tokenizer.o: $(SRC_DIR)/tokenizer.c
 	$(CC) $(CFLAGS) -c $(SRC_DIR)/tokenizer.c
 
-parser.o: $(SRC_DIR)/parser.c $(SRC_DIR)/parser.h
+parser.o: $(SRC_DIR)/parser.c
 	$(CC) $(CFLAGS) -c $(SRC_DIR)/parser.c
+
+leaderboard.o: $(SRC_DIR)/leaderboard.c
+	$(CC) $(CFLAGS) -c $(SRC_DIR)/leaderboard.c
 
 .PHONY: clean
 clean:
-	del *.o nerdle
+	del *.o nerdle.exe
