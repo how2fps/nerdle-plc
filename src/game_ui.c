@@ -25,7 +25,8 @@ void print_guess_board(const GameFSM *game)
        }
 
        printf("\033[H\033[J");
-       printf("=========Nerdle========\n");
+       printf("Target equation (for debugging): %s\n", game->answer);
+       printf("========= NERDLE ========\n");
        for (row = 0; row < game->max_guesses; row++)
        {
               if (row < game->guesses_used)

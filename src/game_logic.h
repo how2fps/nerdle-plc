@@ -51,17 +51,20 @@ typedef enum
 } SlotState;
 
 typedef struct{
-        int in_answer;
+        char character;
         int correct_position;
 } SlotInput;
 
 typedef struct LeGameFSM{
         GameState current_state;
-        char *answer;
-        int max_guesses;
-        int guesses_used;
+        SlotState *current_guess;
         char **guess_history;
         SlotState **feedback_history;
+        char *current_guess_str;
+        char *answer;
+        int freq[256];
+        int max_guesses;
+        int guesses_used;
         int has_won;
         void (*print)(struct LeGameFSM *);
 } GameFSM;

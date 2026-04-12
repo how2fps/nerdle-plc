@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include "evaluator.h"
 #include "game_logic.h"
 #include "parser.h"
 
@@ -31,6 +32,15 @@ GameFSM *create_game(char *target_equation, int max_guesses, int initial_has_won
        }
 
        strcpy(g->answer, target_equation);
+       g->current_guess = malloc(sizeof(SlotState) * strlen(target_equation));
+       if (g->current_guess == NULL)
+       {
+              free(g->answer);
+              free(g);
+              return NULL;
+       }
+       g->current_guess_str = NULL;
+       memset(g->freq, 0, sizeof(g->freq));
        g->print = print;
        g->max_guesses = max_guesses;
        g->guesses_used = 0;
@@ -74,7 +84,7 @@ GameFSM *create_game(char *target_equation, int max_guesses, int initial_has_won
               g->current_state = GAME_STATE_START;
        }
        g->has_won = initial_has_won;
-       print(g);
+       /* print(g); */
        return g;
 
 }
@@ -168,7 +178,7 @@ ValidationStatus validate_guess(GameFSM *game, const char *guess)
               return VALIDATION_WRONG_LENGTH;
        }
 
-       if (validate_equation(guess) == 0)
+       if (validate_equation(guess) == 0 || process_line((char *)guess, 0) == 0)
        {
               transition_gamestate(game, GAME_EVENT_VALIDATION_FAIL);
               return VALIDATION_BAD_EQUATION;
@@ -191,20 +201,39 @@ static SlotInput next_slot_input(
        char *answer_str)
 {
        SlotInput input;
-       input.in_answer = (strchr(answer_str, guess_char) != NULL) ? 1 : 0;
+       input.character = guess_char;
        input.correct_position = (guess_char == answer_char) ? 1 : 0;
        return input;
 }
 
-static SlotState next_slot_state(SlotState current, SlotInput input)
+static SlotState next_slot_state(int iteration, GameFSM *game, SlotInput input)
 {
-       if (input.in_answer && input.correct_position)
+       if(iteration == 1)
        {
-              return CORRECT;
+              if(input.correct_position){
+                     game->freq[(unsigned char)input.character]--;
+                     return CORRECT;
+              }
+              else
+              {
+                     return WRONG;
+              }
        }
-       else if (input.in_answer)
+       else if(iteration == 2)
        {
-              return PARTIAL;
+              if (input.correct_position)
+              {
+                     return CORRECT;
+              }
+              else if (strchr(game->answer, input.character) != NULL && game->freq[(unsigned char)input.character] > 0)
+              {
+                     game->freq[(unsigned char)input.character]--;
+                     return PARTIAL;
+              }
+              else
+              {
+                     return WRONG;
+              }
        }
        else
        {
@@ -214,18 +243,33 @@ static SlotState next_slot_state(SlotState current, SlotInput input)
 
 SlotState *evaluate_guess(GameFSM *game, const char *guess)
 {
-       size_t i;
+       size_t i, j;
+       size_t len;
        SlotInput input;
        SlotState *result = malloc(sizeof(SlotState) * strlen(game->answer));
        if (result == NULL || guess == NULL || game->answer == NULL || strlen(guess) != strlen(game->answer))
        {
               return NULL;
        }
-       for (i = 0; i < strlen(game->answer); i++)
+       len = strlen(game->answer);
+       if (strlen(guess) != len)
        {
-              input = next_slot_input(guess[i], game->answer[i], (char *)game->answer);
-              result[i] = next_slot_state(WRONG, input);
-              
+              free(result);
+              return NULL;
+       }
+       memset(game->freq, 0, sizeof(game->freq));
+       for (i = 0; i < len; i++)
+       {
+              game->freq[(unsigned char)game->answer[i]]++;
+       }
+       for(j = 1; j <= 2; j++)
+       {
+              for (i = 0; i < len; i++)
+              {
+                     input = next_slot_input(guess[i], game->answer[i], (char *)game->answer);
+                     result[i] = next_slot_state(j, game, input);
+                     
+              }
        }
        return result;
 }

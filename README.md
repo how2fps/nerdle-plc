@@ -6,7 +6,8 @@ A C-based clone of the popular math game **Nerdle**, developed for the SUTD 50.0
 
 The goal is to guess the hidden mathematical equation in 6 tries.
 
-- **The Equation:** Must be 8 characters long and contain exactly one `=` sign.
+- **The Equation:** Must be 8 characters long and contain exactly one `=` sign *after* all operations.
+     - _Example:_ `12+12=24` is valid, but `3*8=4*6`is not.
 - **The Content:** Numbers (0-9) and basic operators (`+`, `-`, `*`, `/`).
 - **Mathematical Validity:** The equation must be mathematically correct according to the order of operations (PEMDAS/BODMAS).
      - _Example:_ `3+2*5=13` is valid, but `3+2*5=25` is not.
@@ -15,8 +16,23 @@ The goal is to guess the hidden mathematical equation in 6 tries.
 ### Color Feedback
 
 - 🟩 **Green**: The character is in the correct spot.
-- 🟪 **Purple**: The character is in the equation but in a different spot.
-- ⬛ **Black**: The character is not in the equation at all.
+- 🟨 **Yellow**: The character is in the equation but in a different spot.
+- 🟥 **Red**: The character is not in the equation at all.
+
+---
+
+## 🎮 Game Menu
+
+1. Play Game
+     - Play basic nerdle game with a random equation from equations.txt
+2. Check Leaderboard
+     - Check recent leaderboard statistics
+3. Add New Equation
+     - Add a custom equation to equations.txt
+4. Challenge Mode
+     - Enter a custom nerdle, then challenge a friend locally
+5. Exit
+     - Exit the game interface
 
 ---
 
