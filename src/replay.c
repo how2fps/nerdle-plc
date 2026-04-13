@@ -30,6 +30,7 @@ void save_replay(char name[MAX_NAME_LEN], GameFSM *g)
        }
 
        fwrite("NRDL", 1, 4, fptr);
+       fwrite(g->answer, sizeof(char), EQUATION_LEN + 1, fptr);
        fwrite(&g->guesses_used, sizeof(int), 1, fptr);
        for (i = 0; i < g->guesses_used; i++)
        {
@@ -42,10 +43,19 @@ void save_replay(char name[MAX_NAME_LEN], GameFSM *g)
 
 void play_replay()
 {
+       int max_guesses = 6;
+       char check[4];
+       char filepath[256];
+       char answer[EQUATION_LEN + 1];
        char files[32][128];
+       GameFSM *g;
+
+       int guesses_used;
        int count = 0;
        int choice = 0;
+       int i = 0;
        int j = 0;
+       FILE *fptr;
 
 #ifdef _WIN32
        WIN32_FIND_DATA fd;
@@ -54,7 +64,7 @@ void play_replay()
        {
               do
               {
-                     printf("%s\n", fd.cFileName);
+                     strncpy(files[count++], fd.cFileName, 127);
               } while (FindNextFile(h, &fd));
               FindClose(h);
        }
@@ -67,10 +77,64 @@ void play_replay()
               {
                      if (strstr(entry->d_name, ".nrdl") != NULL)
                      {
-                            printf("%s\n", entry->d_name);
+                            strncpy(files[count++], entry->d_name, 127);
                      }
               }
               closedir(dir);
        }
 #endif
+       if (count == 0)
+       {
+              printf("No replays yet.");
+              return;
+       }
+       for (j = 0; j < count; j++)
+       {
+              printf("%d. %s\n", j + 1, files[j]);
+       }
+       printf("Choose a replay (1-%d): ", count);
+       scanf("%d", &choice);
+       if (choice < 1 || choice > count)
+       {
+              printf("Selected invalid file, please put in the position of the replay you want to play");
+              return;
+       }
+       sprintf(filepath, "replays/%s", files[choice - 1]);
+
+       fptr = fopen(filepath, "rb");
+       if (fptr == NULL)
+       {
+              printf("Issue opening file");
+              return;
+       }
+
+       /* Reading for NRDL here to check for no corruption, maybe change to checksum */
+       fread(check, 1, 4, fptr);
+       if (memcmp(check, "NRDL", 4) != 0)
+       {
+              printf("Invalid replay file.\n");
+              fclose(fptr);
+              return;
+       }
+       printf("Valid file");
+
+       /* Reading for answer here */
+       fread(answer, 1, EQUATION_LEN + 1, fptr);
+
+       fread(&guesses_used, sizeof(int), 1, fptr);
+
+       g = create_game(answer, max_guesses, 0);
+
+       if (g == NULL)
+       {
+              fclose(fptr);
+              return;
+       }
+
+       g->guesses_used = guesses_used;
+       for (i = 0; i < guesses_used; i++)
+       {
+              fread(g->guess_history[i], sizeof(char), EQUATION_LEN + 1, fptr);
+              fread(g->feedback_history[i], sizeof(SlotState), EQUATION_LEN, fptr);
+       }
 }
