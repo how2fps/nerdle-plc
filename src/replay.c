@@ -2,6 +2,7 @@
 #include <time.h>
 #include <stdlib.h>
 #include <string.h>
+#include "conio.h"
 #ifdef _WIN32
 #include <windows.h>
 #else
@@ -94,6 +95,8 @@ void play_replay()
        }
        printf("Choose a replay (1-%d): ", count);
        scanf("%d", &choice);
+       while (getchar() != '\n')
+              ;
        if (choice < 1 || choice > count)
        {
               printf("Selected invalid file, please put in the position of the replay you want to play");
@@ -116,12 +119,12 @@ void play_replay()
               fclose(fptr);
               return;
        }
-       printf("Valid file");
 
        /* Reading for answer here */
        fread(answer, 1, EQUATION_LEN + 1, fptr);
 
        fread(&guesses_used, sizeof(int), 1, fptr);
+       printf("guesses_used: %d\n", guesses_used);
 
        g = create_game(answer, max_guesses, 0);
 
@@ -130,6 +133,7 @@ void play_replay()
               fclose(fptr);
               return;
        }
+       printf("Valid file");
 
        g->guesses_used = guesses_used;
        for (i = 0; i < guesses_used; i++)
@@ -137,4 +141,20 @@ void play_replay()
               fread(g->guess_history[i], sizeof(char), EQUATION_LEN + 1, fptr);
               fread(g->feedback_history[i], sizeof(SlotState), EQUATION_LEN, fptr);
        }
+       fclose(fptr);
+
+       g->guesses_used = 0;
+       enter_game_view();
+       print_guess_board(g);
+       for (i = 1; i <= guesses_used; i++)
+       {
+              printf("Press any key for next guess...\n");
+              getch();
+              g->guesses_used = i;
+              print_guess_board(g);
+       }
+       printf("Replay finished. Press any key to return...\n");
+       getch();
+       leave_game_view();
+       destroy_game(g);
 }
