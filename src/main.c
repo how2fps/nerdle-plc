@@ -208,7 +208,7 @@ int main(void)
                             {
                                    break;
                             }
-
+                            /* preliminary input validation, checks input is not more than 8 characters */
                             guess_len = (int)strcspn(guess_input, "\n");
                             if (guess_input[guess_len] == '\n')
                             {
@@ -216,6 +216,7 @@ int main(void)
                             }
                             else
                             {
+                                   /* user typed too many characters, flush leftover characters in stdin */
                                    while ((ch = getchar()) != '\n' && ch != EOF)
                                    {
                                    }
@@ -223,19 +224,26 @@ int main(void)
                                    continue;
                             }
 
+                            /* for users to return to main menu  */
+                            if (!strcmp(guess_input, "q"))
+                            {
+                                   break;
+                            }
+
                             strncpy(guess, guess_input, MAX_ANSWER_SIZE);
                             guess[MAX_ANSWER_SIZE] = '\0';
 
-                            if (game->current_state == GAME_STATE_START)
+                            /*if (game->current_state == GAME_STATE_START)
                             {
-                                   transition_gamestate(game, GAME_EVENT_INIT); /* to GAME_STATE_INPUT  */
+                                   transition_gamestate(game, GAME_EVENT_INIT); // to GAME_STATE_INPUT
                             }
-                            transition_gamestate(game, GAME_EVENT_SUBMIT_GUESS); /* to GAME_STATE_VALIDATION  */
+                            transition_gamestate(game, GAME_EVENT_SUBMIT_GUESS); // to GAME_STATE_VALIDATION
+                            */
 
                             status = play_guess_turn(game, guess);
                             if (status == GUESS_INVALID)
                             {
-                                   print_guess_board(game);
+                                   /* print_guess_board(game); bug here*/
                                    continue;
                             }
 
@@ -256,14 +264,17 @@ int main(void)
                             seconds = total_seconds % 60;
                             printf("Total time taken: %02d:%02d\n", minutes, seconds);
                             writeLeaderboard(name, minutes, seconds);
+                            prompt_return_to_menu();
                      }
                      else if (get_guesses_left(game) == 0)
                      {
                             print_game_lost_result(game);
+                            prompt_return_to_menu();
                      }
 
                      save_replay(name, game);
-                     prompt_return_to_menu();
+
+                     /* don't put prompt_return_to_menu() here because ctrl+c-ing will call it */
                      leave_game_view();
 
                      free(guess);
