@@ -6,6 +6,6 @@
 
 void save_replay(char name[MAX_NAME_LEN], GameFSM *g);
 
-void play_replay(FILE *fp);
+void play_replay(void);
 
 #endif
