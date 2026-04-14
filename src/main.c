@@ -290,6 +290,10 @@ int main(void)
 
               case '3':
                      get_aesthetic_input(input, EQUATION_LEN);
+                     if ((process_line(input, 1)) == -1)
+                     {
+                            break;
+                     }
                      if (validate_equation(input) && process_line(input, 1))
                      {
                             int duplicate = 0;
