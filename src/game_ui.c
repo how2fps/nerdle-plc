@@ -1,5 +1,5 @@
 #include <stdio.h>
-#include "conio.h"
+#include "input.h"
 #include "game_ui.h"
 
 void enter_game_view(void)
@@ -76,7 +76,7 @@ void print_turn_status(const GameFSM *game)
 void prompt_return_to_menu(void)
 {
        printf("Press any key to return to menu...\n");
-       getch();
+       custom_getch();
 }
 
 void print_game_lost_result(const GameFSM *game)
