@@ -79,7 +79,9 @@ int evaluate_expression(Token tokens[EQUATION_LEN + 1])
        for (i = 0; i < EQUATION_LEN + 1; i++)
        {
               if (tokens[i].text[0] == '\0')
+              {
                      break;
+              }
 
               if (tokens[i].is_number)
               {
@@ -94,14 +96,26 @@ int evaluate_expression(Token tokens[EQUATION_LEN + 1])
                      top--;
 
                      if (tokens[i].text[0] == '+')
+                     {
                             result = left + right;
+                     }
                      if (tokens[i].text[0] == '-')
+                     {
                             result = left - right;
+                     }
                      if (tokens[i].text[0] == '*')
-                            result = left * right;
-                     if (tokens[i].text[0] == '/')
-                            result = left / right;
+                     {
 
+                            result = left * right;
+                     }
+                     if (tokens[i].text[0] == '/')
+                     {
+                            if (right == 0)
+                            {
+                                   return -1;
+                            }
+                            result = left / right;
+                     }
                      top++;
                      stack[top] = result;
               }
@@ -109,39 +123,51 @@ int evaluate_expression(Token tokens[EQUATION_LEN + 1])
        return stack[top];
 }
 
-int evaluate_string(const char *buf, int len, double *result)
+int evaluate_string(const char *buf, int len, int *result)
 {
+       int answer;
        Token infix[EQUATION_LEN + 1];
        Token postfix[EQUATION_LEN + 1];
 
        tokenize_expression(buf, infix);
        infix_to_postfix(infix, postfix);
-       *result = (double)evaluate_expression(postfix);
-       return 0;
+       answer = evaluate_expression(postfix);
+       if (answer != -1)
+       {
+              *result = answer;
+       }
+       return answer;
 }
 
 int process_line(char *line, int print_message)
 {
-       char *line_copy = strdup(line);
-       char *equals_ptr = strchr(line_copy, '=');
+       char *line_copy;
+       char *equals_ptr;
        char *lhs_str, *rhs_str;
-       double left_val, right_val;
+       int left_val, right_val;
        int result = 0;
 
+       line_copy = (char *)malloc(strlen(line) + 1);
+       strcpy(line_copy, line);
+       equals_ptr = strchr(line_copy, '=');
        if (equals_ptr != NULL)
        {
               *equals_ptr = '\0';
               lhs_str = line_copy;
               rhs_str = equals_ptr + 1;
 
-              evaluate_string(lhs_str, strlen(lhs_str), &left_val);
-              evaluate_string(rhs_str, strlen(rhs_str), &right_val);
+              if ((evaluate_string(lhs_str, strlen(lhs_str), &left_val)) == -1 || (evaluate_string(rhs_str, strlen(rhs_str), &right_val)) == -1)
+              {
+                     printf("Error: Division by 0!");
+                     free(line_copy);
+                     return -1;
+              }
 
               if (left_val == right_val)
               {
                      if (print_message)
                      {
-                            printf("Correct! LHS: %s=%.0f == RHS: %.0f\n", lhs_str, left_val, right_val);
+                            printf("Correct! LHS: %s=%d == RHS: %d\n", lhs_str, left_val, right_val);
                      }
                      result = 1;
               }
@@ -149,7 +175,7 @@ int process_line(char *line, int print_message)
               {
                      if (print_message)
                      {
-                            printf("Rejected: LHS: %s=%.0f but RHS: %.0f\n", lhs_str, left_val, right_val);
+                            printf("Rejected: LHS: %s=%d but RHS: %d\n", lhs_str, left_val, right_val);
                      }
                      result = 0;
               }
