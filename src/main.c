@@ -10,29 +10,7 @@
 #include "leaderboard.h"
 #include "game_ui.h"
 #include "replay.h"
-
-#ifdef _WIN32
-#include <conio.h>
-#define getch _getch
-#else
-#include <stdio.h>
-#include <termios.h>
-#include <unistd.h>
-
-int getch(void)
-{
-       struct termios oldt, newt;
-       int ch;
-       tcgetattr(STDIN_FILENO, &oldt);
-       newt = oldt;
-       newt.c_lflag &= ~(ICANON | ECHO);
-       tcsetattr(STDIN_FILENO, TCSANOW, &newt);
-       ch = getchar();
-       tcsetattr(STDIN_FILENO, TCSANOW, &oldt);
-       return ch;
-}
-
-#endif
+#include "input.h"
 
 #define MAX_ANSWER_SIZE 8
 
@@ -55,7 +33,7 @@ void get_aesthetic_input(char *buffer, int max_len)
                      printf("_");
               }
 
-              ch = getch();
+              ch = custom_getch();
 
               if (ch == '\r' || ch == '\n')
               {
@@ -124,7 +102,7 @@ int main(void)
               printf("6. Exit\n");
               printf("Selection: ");
 
-              choice = getch();
+              choice = custom_getch();
               printf("%c\n", choice);
 
               switch (choice)

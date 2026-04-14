@@ -2,7 +2,7 @@
 #include <time.h>
 #include <stdlib.h>
 #include <string.h>
-#include "conio.h"
+#include "input.h"
 #ifdef _WIN32
 #include <windows.h>
 #else
@@ -42,7 +42,7 @@ void save_replay(char name[MAX_NAME_LEN], GameFSM *g)
        fclose(fptr);
 }
 
-void play_replay()
+void play_replay(void)
 {
        int max_guesses = 6;
        char check[4];
@@ -149,12 +149,12 @@ void play_replay()
        for (i = 1; i <= guesses_used; i++)
        {
               printf("Press any key for next guess...\n");
-              getch();
+              custom_getch();
               g->guesses_used = i;
               print_guess_board(g);
        }
        printf("Replay finished. Press any key to return...\n");
-       getch();
+       custom_getch();
        leave_game_view();
        destroy_game(g);
 }

@@ -133,8 +133,6 @@ int writeLeaderboard(const char *name, int minutes, int seconds) {
     return 0;
 }
 
-
-
 /*----------------------------------------Main-----------------------------------
 int main(void) {
     readLeaderboard();
