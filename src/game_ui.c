@@ -76,7 +76,7 @@ void print_turn_status(const GameFSM *game)
 void prompt_return_to_menu(void)
 {
        printf("Press any key to return to menu...\n");
-       custom_getch();
+       getch();
 }
 
 void print_game_lost_result(const GameFSM *game)
