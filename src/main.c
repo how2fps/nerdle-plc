@@ -45,7 +45,7 @@ void get_aesthetic_input(char *buffer, int max_len)
                      continue;
               }
 
-              if (ch == '\b')
+              if (ch == '\b' || ch == 127)
               {
                      if (current_len > 0)
                      {
