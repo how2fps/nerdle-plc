@@ -13,6 +13,7 @@
 #include "input.h"
 
 #define MAX_ANSWER_SIZE 8
+#define MAX_GUESSES 6
 
 void get_aesthetic_input(char *buffer, int max_len)
 {
@@ -70,11 +71,6 @@ int main(void)
        char line[100];
        char input[100];
        char name[MAX_NAME_LEN];
-       time_t game_start;
-       time_t game_end;
-       int total_seconds;
-       int minutes;
-       int seconds;
        int i;
        int len;
        int ch;
@@ -82,14 +78,19 @@ int main(void)
        int running = 1;
 
        /* game logic variables */
-       /* char equation[EQUATION_LEN + 1]; */
        GameFSM *game;
        GuessStatus status;
        char *equation;
        char *guess;
        char guess_input[MAX_ANSWER_SIZE + 3];
        int guess_len;
-       int max_guesses = 6;
+
+       /* timer variables */
+       time_t game_start;
+       time_t game_end;
+       int total_seconds;
+       int minutes;
+       int seconds;
 
        while (running)
        {
@@ -159,7 +160,7 @@ int main(void)
                      strncpy(equation, line, len);
                      equation[len] = '\0';
 
-                     game = create_game(equation, max_guesses, 0);
+                     game = create_game(equation, MAX_GUESSES, 0);
                      if (game == NULL || game->answer == NULL)
                      {
                             free(equation);
@@ -211,17 +212,9 @@ int main(void)
                             strncpy(guess, guess_input, MAX_ANSWER_SIZE);
                             guess[MAX_ANSWER_SIZE] = '\0';
 
-                            /*if (game->current_state == GAME_STATE_START)
-                            {
-                                   transition_gamestate(game, GAME_EVENT_INIT); // to GAME_STATE_INPUT
-                            }
-                            transition_gamestate(game, GAME_EVENT_SUBMIT_GUESS); // to GAME_STATE_VALIDATION
-                            */
-
                             status = play_guess_turn(game, guess);
                             if (status == GUESS_INVALID)
                             {
-                                   /* print_guess_board(game); bug here*/
                                    continue;
                             }
 
@@ -252,7 +245,6 @@ int main(void)
 
                      save_replay(name, game);
 
-                     /* don't put prompt_return_to_menu() here because ctrl+c-ing will call it */
                      leave_game_view();
 
                      free(guess);
@@ -337,7 +329,7 @@ int main(void)
                      strncpy(equation, input, len);
                      equation[len] = '\0';
 
-                     game = create_game(equation, max_guesses, 0);
+                     game = create_game(equation, MAX_GUESSES, 0);
                      if (game == NULL || game->answer == NULL)
                      {
                             free(equation);
