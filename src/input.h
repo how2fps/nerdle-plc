@@ -1,6 +1,9 @@
 #ifndef INPUT_H
 #define INPUT_H
 
-int custom_getch(void);
+#ifdef _WIN32
+#else
+    int custom_getch(void);
+#endif
 
 #endif
