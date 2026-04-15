@@ -34,7 +34,7 @@ void get_aesthetic_input(char *buffer, int max_len)
                      printf("_");
               }
 
-              ch = custom_getch();
+              ch = getch();
 
               if (ch == '\r' || ch == '\n')
               {
@@ -75,6 +75,7 @@ int main(void)
        int len;
        int ch;
        char choice;
+       int validation_status;
        int running = 1;
 
        /* game logic variables */
@@ -103,7 +104,7 @@ int main(void)
               printf("6. Exit\n");
               printf("Selection: ");
 
-              choice = custom_getch();
+              choice = getch();
               printf("%c\n", choice);
 
               switch (choice)
@@ -311,7 +312,18 @@ int main(void)
                      do
                      {
                             get_aesthetic_input(input, EQUATION_LEN);
-                     } while (validate_equation(input) == 0 || process_line(input, 1) == 0);
+                            validation_status = process_line(input, 1);
+                     } while (validation_status == -1 || validate_equation(input) == 0 || validation_status == 0);
+
+                     printf("\n--- Starting Game ---\n");
+                     printf("Enter your name: ");
+                     fgets(name, sizeof(name), stdin);
+                     name[strcspn(name, "\n")] = '\0';
+                     if (strlen(name) == 0)
+                     {
+                            strcpy(name, "Player");
+                     }
+                     printf("Player name: %s\n", name);
 
                      len = strlen(input);
                      if (len > 0 && input[len - 1] == '\n')
@@ -345,6 +357,7 @@ int main(void)
                             return 1;
                      }
 
+                     game_start = time(NULL);
                      enter_game_view();
                      print_guess_board(game);
 
@@ -370,19 +383,17 @@ int main(void)
                                    continue;
                             }
 
+                            if (!strcmp(guess_input, "q"))
+                            {
+                                   break;
+                            }
+
                             strncpy(guess, guess_input, MAX_ANSWER_SIZE);
                             guess[MAX_ANSWER_SIZE] = '\0';
-
-                            if (game->current_state == GAME_STATE_START)
-                            {
-                                   transition_gamestate(game, GAME_EVENT_INIT); /* to GAME_STATE_INPUT  */
-                            }
-                            transition_gamestate(game, GAME_EVENT_SUBMIT_GUESS); /* to GAME_STATE_VALIDATION  */
 
                             status = play_guess_turn(game, guess);
                             if (status == GUESS_INVALID)
                             {
-                                   print_guess_board(game);
                                    continue;
                             }
 
@@ -397,14 +408,22 @@ int main(void)
 
                      if (is_game_won(game) == 1)
                      {
-                            printf("You won!\n");
+                            game_end = time(NULL);
+                            total_seconds = (int)difftime(game_end, game_start);
+                            minutes = total_seconds / 60;
+                            seconds = total_seconds % 60;
+                            printf("Total time taken: %02d:%02d\n", minutes, seconds);
+                            writeLeaderboard(name, minutes, seconds);
+                            prompt_return_to_menu();
                      }
                      else if (get_guesses_left(game) == 0)
                      {
                             print_game_lost_result(game);
+                            prompt_return_to_menu();
                      }
 
-                     prompt_return_to_menu();
+                     save_replay(name, game);
+
                      leave_game_view();
 
                      free(guess);

@@ -2,11 +2,12 @@
 #include "input.h"
 #ifdef _WIN32
        #include <conio.h>
+       #define getch _getch
 #else
        #include <termios.h>
        #include <unistd.h>
 
-       int custom_getch(void)
+       int getch(void)
        {
               struct termios oldt, newt;
               int ch;

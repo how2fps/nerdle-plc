@@ -150,12 +150,12 @@ void play_replay(void)
        for (i = 1; i <= guesses_used; i++)
        {
               printf("Press any key for next guess...\n");
-              custom_getch();
+              getch();
               g->guesses_used = i;
               print_guess_board(g);
        }
        printf("Replay finished. Press any key to return...\n");
-       custom_getch();
+       getch();
        leave_game_view();
        destroy_game(g);
 }

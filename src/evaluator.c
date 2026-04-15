@@ -158,7 +158,7 @@ int process_line(char *line, int print_message)
 
               if ((evaluate_string(lhs_str, strlen(lhs_str), &left_val)) == -1 || (evaluate_string(rhs_str, strlen(rhs_str), &right_val)) == -1)
               {
-                     printf("Error: Division by 0!");
+                     printf("Error: Division by 0!\n");
                      free(line_copy);
                      return -1;
               }
@@ -167,7 +167,7 @@ int process_line(char *line, int print_message)
               {
                      if (print_message)
                      {
-                            printf("Correct! LHS: %s=%d == RHS: %d\n", lhs_str, left_val, right_val);
+                            printf("Correct! LHS: %s=%d == RHS: %d\n ", lhs_str, left_val, right_val);
                      }
                      result = 1;
               }
@@ -175,7 +175,7 @@ int process_line(char *line, int print_message)
               {
                      if (print_message)
                      {
-                            printf("Rejected: LHS: %s=%d but RHS: %d\n", lhs_str, left_val, right_val);
+                            printf("Rejected: LHS: %s=%d but RHS: %d\n ", lhs_str, left_val, right_val);
                      }
                      result = 0;
               }
