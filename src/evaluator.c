@@ -99,16 +99,16 @@ int evaluate_expression(Token tokens[EQUATION_LEN + 1])
                      {
                             result = left + right;
                      }
-                     if (tokens[i].text[0] == '-')
+                     else if (tokens[i].text[0] == '-')
                      {
                             result = left - right;
                      }
-                     if (tokens[i].text[0] == '*')
+                     else if (tokens[i].text[0] == '*')
                      {
 
                             result = left * right;
                      }
-                     if (tokens[i].text[0] == '/')
+                     else if (tokens[i].text[0] == '/')
                      {
                             if (right == 0)
                             {
@@ -148,7 +148,7 @@ int process_line(char *line, int print_message)
        int result = 0;
 
        line_copy = (char *)malloc(strlen(line) + 1);
-       strcpy(line_copy, line);
+       strncpy(line_copy, line, strlen(line) + 1);
        equals_ptr = strchr(line_copy, '=');
        if (equals_ptr != NULL)
        {

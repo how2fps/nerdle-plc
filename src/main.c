@@ -412,7 +412,6 @@ int main(void)
                             print_game_lost_result(game);
                      }
 
-                     save_replay(name, game);
                      prompt_return_to_menu();
                      leave_game_view();
 

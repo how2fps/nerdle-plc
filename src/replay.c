@@ -22,7 +22,7 @@ void save_replay(char name[MAX_NAME_LEN], GameFSM *g)
        system("mkdir -p replays");
 #endif
 
-       sprintf(filename, "replays/replay_%s_%ld.nrdl", name, (long)seconds);
+       snprintf(filename, sizeof(filename), "replays/replay_%s_%ld.nrdl", name, (long)seconds);
 
        fptr = fopen(filename, "wb");
        if (fptr == NULL)
@@ -81,6 +81,7 @@ void play_replay(void)
                             strncpy(files[count++], entry->d_name, 127);
                      }
               }
+              files[count][127] = '\0';
               closedir(dir);
        }
 #endif
