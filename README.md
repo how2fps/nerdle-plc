@@ -31,7 +31,9 @@ The goal is to guess the hidden mathematical equation in 6 tries.
      - Add a custom equation to equations.txt
 4. Challenge Mode
      - Enter a custom nerdle, then challenge a friend locally
-5. Exit
+5. Watch Replay
+     - Rewatch past games played saved as binary files
+6. Exit
      - Exit the game interface
 
 ---
@@ -52,3 +54,13 @@ To compile the game, run the following command in your terminal:
 ```bash
 make
 ```
+
+### Execution
+
+After compiling, run the following command in your terminal:
+
+```bash
+nerdle
+```
+
+Have fun!
