@@ -177,14 +177,20 @@ ValidationStatus validate_guess(GameFSM *game, const char *guess)
               transition_gamestate(game, GAME_EVENT_VALIDATION_FAIL);
               return VALIDATION_WRONG_LENGTH;
        }
+       /* check for invalid syntax */
+       if (validate_equation(guess) == 0)
+       {
+              transition_gamestate(game, GAME_EVENT_VALIDATION_FAIL);
+              return VALIDATION_BAD_EQUATION;
+       }
        /* check for division by 0*/
        if (process_line((char *)guess, 0) == -1)
        {
               transition_gamestate(game, GAME_EVENT_VALIDATION_FAIL);
               return VALIDATION_BAD_EQUATION;
        }
-       /* check for valid equation */
-       if (validate_equation(guess) == 0 || process_line((char *)guess, 0) == 0)
+       /* check for invalid equation */
+       if (process_line((char *)guess, 0) == 0)
        {
               transition_gamestate(game, GAME_EVENT_VALIDATION_FAIL);
               return VALIDATION_BAD_EQUATION;
