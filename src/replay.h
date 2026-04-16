@@ -5,7 +5,7 @@
 #include "leaderboard.h"
 #include "game_ui.h"
 
-void save_replay(char name[MAX_NAME_LEN], GameFSM *g);
+void save_replay(const char name[MAX_NAME_LEN], GameFSM *g);
 
 void play_replay(void);
 

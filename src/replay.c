@@ -9,7 +9,7 @@
 #include <dirent.h>
 #endif
 
-void save_replay(char name[MAX_NAME_LEN], GameFSM *g)
+void save_replay(const char name[MAX_NAME_LEN], GameFSM *g)
 {
        int i = 0;
        FILE *fptr;
@@ -125,7 +125,7 @@ void play_replay(void)
        fread(answer, 1, EQUATION_LEN + 1, fptr);
 
        fread(&guesses_used, sizeof(int), 1, fptr);
-       printf("guesses_used: %d\n", guesses_used);
+       /*printf("guesses_used: %d\n", guesses_used);*/
 
        g = create_game(answer, max_guesses, 0);
 
@@ -134,7 +134,7 @@ void play_replay(void)
               fclose(fptr);
               return;
        }
-       printf("Valid file");
+       /*printf("Valid file\n");*/
 
        g->guesses_used = guesses_used;
        for (i = 0; i < guesses_used; i++)
