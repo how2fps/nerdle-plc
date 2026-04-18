@@ -2,15 +2,16 @@
 #define LEADERBOARD_H
 
 #define MAX_NAME_LEN 64
-#define MAX_ENTRIES  100
+#define MAX_ENTRIES 100
 #define LEADERBOARD_FILE "../leaderboard.txt"
 
-typedef struct {
+typedef struct
+{
     char name[MAX_NAME_LEN];
     int minutes;
     int seconds;
-    char date[12];   /* "DD/MM/YYYY\0" */
-    char time[12];   /* "HH:MM:SS\0"  */
+    char date[12]; /* "DD/MM/YYYY\0" */
+    char time[12]; /* "HH:MM:SS\0"  */
 } LeaderboardEntry;
 
 /* Leaderboard functions */

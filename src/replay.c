@@ -9,6 +9,17 @@
 #include <dirent.h>
 #endif
 
+/*
+ * Serialises the completed game state to a binary .nrdl file inside
+ * the "replays/" directory. The directory is created if it does not
+ * already exist. The filename encodes the player name and a Unix
+ * timestamp so each session produces a unique file.
+ *
+ * Only the guesses that were actually made are written — unfilled rows
+ * in the guess_history are not included.
+ *
+ * Does nothing (returns silently) if the file cannot be opened.
+ */
 void save_replay(const char name[MAX_NAME_LEN], GameFSM *g)
 {
        int i = 0;
@@ -42,6 +53,18 @@ void save_replay(const char name[MAX_NAME_LEN], GameFSM *g)
        fclose(fptr);
 }
 
+/*
+ * Lists all .nrdl files in the "replays/" directory, prompts the user
+ * to choose one, then plays it back step by step on the guess board.
+ *
+ * Playback works by loading the full game history into a GameFSM, then
+ * revealing one guess per keypress by incrementing guesses_used and
+ * redrawing the board — mirroring exactly what the player saw during
+ * the original session.
+ *
+ * Validates the magic header before reading any game data to guard
+ * against corrupted or incorrectly formatted files.
+ */
 void play_replay(void)
 {
        int max_guesses = 6;

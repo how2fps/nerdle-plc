@@ -1,6 +1,24 @@
 #include "tokenizer.h"
 #include <ctype.h>
 
+/*
+ * Walks the expression string character by character and fills the
+ * tokens array with the extracted tokens:
+ *
+ *   - Digit sequences are grouped into a single number token
+ *     (is_number = 1, text holds the digit characters).
+ *   - Whitespace characters are silently skipped.
+ *   - Any other character (operators, '=') becomes a single-character
+ *     operator token (is_number = 0).
+ *
+ * The array is null-terminated by setting tokens[i].text[0] = '\0'
+ * after the last real token, acting as a sentinel for code that
+ * iterates until it finds an empty token.
+ * 
+ * Returns:
+ *   A pointer to the original expression string (unused by callers;
+ *   kept for potential future use).
+ */
 char *tokenize_expression(const char *expression, Token tokens[EQUATION_LEN + 1])
 {
        const char *ptr = expression;

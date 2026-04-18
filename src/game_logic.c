@@ -87,7 +87,6 @@ GameFSM *create_game(char *target_equation, int max_guesses, int initial_has_won
        g->has_won = initial_has_won;
        /* print(g); */
        return g;
-
 }
 
 void transition_gamestate(GameFSM *fsm, GameEvent event)
@@ -163,7 +162,7 @@ void transition_gamestate(GameFSM *fsm, GameEvent event)
 ValidationStatus validate_guess(GameFSM *game, const char *guess)
 {
        int i;
-       
+
        if (game == NULL || guess == NULL)
        {
               if (game != NULL)
@@ -195,10 +194,12 @@ ValidationStatus validate_guess(GameFSM *game, const char *guess)
        {
               transition_gamestate(game, GAME_EVENT_VALIDATION_FAIL);
               return VALIDATION_BAD_EQUATION;
-       } 
+       }
 
-       for(i = 0; i < game->guesses_used; i++){
-              if(!strcmp(guess, game->guess_history[i])){
+       for (i = 0; i < game->guesses_used; i++)
+       {
+              if (!strcmp(guess, game->guess_history[i]))
+              {
                      transition_gamestate(game, GAME_EVENT_VALIDATION_FAIL);
                      return VALIDATION_REPEAT_EQUATION;
               }
@@ -209,9 +210,9 @@ ValidationStatus validate_guess(GameFSM *game, const char *guess)
 }
 
 static SlotInput next_slot_input(
-       char guess_char, 
-       char answer_char, 
-       char *answer_str)
+    char guess_char,
+    char answer_char,
+    char *answer_str)
 {
        SlotInput input;
        input.character = guess_char;
@@ -221,9 +222,10 @@ static SlotInput next_slot_input(
 
 static SlotState next_slot_state(int iteration, GameFSM *game, SlotInput input)
 {
-       if(iteration == 1)
+       if (iteration == 1)
        {
-              if(input.correct_position){
+              if (input.correct_position)
+              {
                      game->freq[(unsigned char)input.character]--;
                      return CORRECT;
               }
@@ -232,7 +234,7 @@ static SlotState next_slot_state(int iteration, GameFSM *game, SlotInput input)
                      return WRONG;
               }
        }
-       else if(iteration == 2)
+       else if (iteration == 2)
        {
               if (input.correct_position)
               {
@@ -275,13 +277,12 @@ SlotState *evaluate_guess(GameFSM *game, const char *guess)
        {
               game->freq[(unsigned char)game->answer[i]]++;
        }
-       for(j = 1; j <= 2; j++)
+       for (j = 1; j <= 2; j++)
        {
               for (i = 0; i < len; i++)
               {
                      input = next_slot_input(guess[i], game->answer[i], (char *)game->answer);
                      result[i] = next_slot_state(j, game, input);
-                     
               }
        }
        return result;
@@ -320,7 +321,7 @@ void game_result(GameFSM *game, const char *guess, const SlotState *feedback)
        }
 
        if (all_correct)
-       {      
+       {
               /* GAME WON */
               game->has_won = 1;
               transition_gamestate(game, GAME_EVENT_CORRECT_GUESS); /* to GAME_STATE_WON */
@@ -328,7 +329,7 @@ void game_result(GameFSM *game, const char *guess, const SlotState *feedback)
        else
        {
               if (get_guesses_left(game) == 0)
-              {      /* GAME LOST */
+              {                                                             /* GAME LOST */
                      transition_gamestate(game, GAME_EVENT_OUT_OF_GUESSES); /* to GAME_STATE_LOST */
               }
               else
@@ -364,8 +365,8 @@ GuessStatus play_guess_turn(GameFSM *game, const char *guess)
               return GUESS_ERROR;
        }
 
-       validation_status = validate_guess(game, guess);  
-       /* validate_guess() transitions fsm to GAME_STATE_EVALUTAION if validation passes, 
+       validation_status = validate_guess(game, guess);
+       /* validate_guess() transitions fsm to GAME_STATE_EVALUTAION if validation passes,
        back to GAME_STATE_INPUT without decreasing guesses left */
        if (validation_status != VALIDATION_OK)
        {
@@ -388,14 +389,14 @@ GuessStatus play_guess_turn(GameFSM *game, const char *guess)
               return GUESS_INVALID;
        }
 
-       feedback = evaluate_guess(game, guess); 
+       feedback = evaluate_guess(game, guess);
        if (feedback == NULL)
        {
               return GUESS_ERROR;
        }
 
        transition_gamestate(game, GAME_EVENT_EVALUATION_DONE); /* to GAME_STATE_RESULT */
-       game_result(game, guess, feedback); 
+       game_result(game, guess, feedback);
        /* game_result() transitions fsm to GAME_STATE_WON, GAME_STATE_LOST,
         or back to GAME_STATE_INPUT on win, lose and guesses left > 0 respectively */
 

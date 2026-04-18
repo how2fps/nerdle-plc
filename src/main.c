@@ -15,7 +15,17 @@
 #define MAX_ANSWER_SIZE 8
 #define MAX_GUESSES 6
 
-/* ---------------------- Shared game loop (used by Play and Challenge) ---------------------- */
+/*
+ * Runs a complete game session for the given player and equation.
+ * Creates a GameFSM, then loops reading guesses from stdin until the
+ * player wins, runs out of guesses, or types "q" to quit.
+ *
+ * After the session ends:
+ *   - Prints the game summary (and the answer if the player lost).
+ *   - Writes a leaderboard entry on a win.
+ *   - Saves a replay file.
+ *   - Returns to the caller so main() can redraw the menu.
+ */
 static void run_game_session(const char *name, char *equation)
 {
        GameFSM *game;
@@ -48,6 +58,7 @@ static void run_game_session(const char *name, char *equation)
        enter_game_view();
        print_guess_board(game);
 
+       /* main guess loop: continue until won, out of guesses, or player quits */
        while (get_guesses_left(game) > 0 && is_game_won(game) != 1)
        {
               printf("Your guess: ");
@@ -69,6 +80,7 @@ static void run_game_session(const char *name, char *equation)
                      continue;
               }
 
+              /* "q" lets the player abandon the current session */
               if (!strcmp(guess_input, "q"))
                      break;
 
@@ -91,6 +103,7 @@ static void run_game_session(const char *name, char *equation)
               print_turn_status(game);
        }
 
+       /* calculate elapsed time and guesses used */
        game_end = time(NULL);
        total_seconds = (int)difftime(game_end, game_start);
        guesses_used = MAX_GUESSES - get_guesses_left(game);
@@ -102,6 +115,7 @@ static void run_game_session(const char *name, char *equation)
        }
        else if (get_guesses_left(game) == 0)
        {
+              /* player ran out of guesses — reveal the answer */
               print_game_lost_result(game);
               print_game_summary(name, 0, guesses_used, total_seconds);
        }
@@ -131,7 +145,9 @@ int main(void)
        int running = 1;
        char *equation;
 
+       /* show the welcome/how-to-play screen once at startup */
        print_intro();
+
        while (running)
        {
               print_menu();
@@ -141,6 +157,7 @@ int main(void)
 
               switch (choice)
               {
+              /* ---- Option 1: Play Game ---------------------------------- */
               case '1':
                      print_section_header("STARTING GAME");
                      read_player_name(name, MAX_NAME_LEN);
@@ -184,11 +201,13 @@ int main(void)
                      free(equation);
                      break;
 
+              /* ---- Option 2: Leaderboard -------------------------------- */
               case '2':
                      show_leaderboard();
                      prompt_return_to_menu();
                      break;
 
+              /* ---- Option 3: Add New Equation --------------------------- */
               case '3':
                      print_section_header("ADD EQUATION");
                      get_aesthetic_input(input, EQUATION_LEN);
@@ -241,6 +260,7 @@ int main(void)
                      }
                      break;
 
+              /* ---- Option 4: Challenge Mode ----------------------------- */
               case '4':
                      print_section_header("CHALLENGE MODE");
                      do
@@ -269,11 +289,13 @@ int main(void)
                      free(equation);
                      break;
 
+              /* ---- Option 5: Watch Replay ------------------------------- */
               case '5':
                      print_section_header("WATCH REPLAY");
                      play_replay();
                      break;
 
+              /* ---- Option 6: Exit --------------------------------------- */
               case '6':
                      printf(COLOR_CYAN COLOR_BOLD "\n Goodbye! Thanks for playing!\n" COLOR_RESET);
                      running = 0;

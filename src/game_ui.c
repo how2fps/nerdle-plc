@@ -9,6 +9,12 @@
 
 #define MAX_GUESSES 6
 
+/*
+ * Displays a one-time welcome screen when the program starts.
+ * Clears the terminal, shows the game title in cyan, a short description,
+ * how-to-play rules, and the colour key for feedback tiles.
+ * Waits for any keypress before returning so the player can read it.
+ */
 void print_intro(void)
 {
        printf("\033[2J\033[H");
@@ -37,6 +43,11 @@ void print_intro(void)
        getch();
 }
 
+/*
+ * Clears the screen and renders the main navigation menu.
+ * Each menu option is colour-coded to match its associated section.
+ * The player types a single character to select an option.
+ */
 void print_menu(void)
 {
        printf("\033[2J\033[H");
@@ -69,6 +80,12 @@ void print_menu(void)
        printf("Selection: ");
 }
 
+/*
+ * Renders a centred section banner above each sub-screen (e.g. "WATCH REPLAY").
+ *
+ * Centering is computed from the inner box width (28 chars) and the
+ * length of the title string.
+ */
 void print_section_header(const char *title)
 {
        int title_len = (int)strlen(title);
@@ -100,18 +117,37 @@ void print_section_header(const char *title)
        printf(COLOR_BLUE COLOR_BOLD "+============================+\n" COLOR_RESET);
 }
 
+/*
+ * Switches the terminal to the alternate screen buffer and clears it.
+ * This isolates the game board from the main menu output so that
+ * returning to the menu restores the previous terminal state cleanly.
+ */
 void enter_game_view(void)
 {
        printf("\033[?1049h\033[2J\033[H");
        fflush(stdout);
 }
 
+/*
+ * Restores the terminal from the alternate screen buffer back to the
+ * primary buffer, effectively returning to the state before enter_game_view().
+ */
 void leave_game_view(void)
 {
        printf("\033[?1049l");
        fflush(stdout);
 }
 
+/*
+ * Renders the full 6-row guess grid to the terminal.
+ * Completed rows show each character colour-coded by its feedback:
+ *   GREEN  - correct character in the correct position
+ *   YELLOW - correct character in the wrong position
+ *   RED    - character not present in the answer
+ * Unfilled rows are shown as empty slots "[_]".
+ *
+ * Also prints the target equation as a debug aid (above the board).
+ */
 void print_guess_board(const GameFSM *game)
 {
        int row;
@@ -136,6 +172,7 @@ void print_guess_board(const GameFSM *game)
        {
               if (row < game->guesses_used)
               {
+                     /* render a completed row with colour-coded feedback */
                      for (col = 0; col < EQUATION_LEN; col++)
                      {
                             if (game->feedback_history[row][col] == CORRECT)
@@ -148,6 +185,7 @@ void print_guess_board(const GameFSM *game)
               }
               else
               {
+                     /* render an empty row for guesses not yet made */
                      for (col = 0; col < EQUATION_LEN; col++)
                             printf("[_]");
               }
@@ -157,6 +195,11 @@ void print_guess_board(const GameFSM *game)
        fflush(stdout);
 }
 
+/*
+ * Redraws the guess board and prints a status line below it.
+ * Shows "You got the answer!" if the game has been won, or the
+ * number of remaining guesses otherwise.
+ */
 void print_turn_status(const GameFSM *game)
 {
        print_guess_board(game);
@@ -166,6 +209,10 @@ void print_turn_status(const GameFSM *game)
               printf("Guesses left: %d\n\n", get_guesses_left(game));
 }
 
+/*
+ * Prints the answer when the player has exhausted all guesses without
+ * winning. Does nothing if the game was won or guesses remain.
+ */
 void print_game_lost_result(const GameFSM *game)
 {
        if (game == NULL)
@@ -174,6 +221,10 @@ void print_game_lost_result(const GameFSM *game)
               printf("No guesses left. The answer was: %s\n", game->answer);
 }
 
+/*
+ * Displays a formatted end-of-game summary box showing the outcome,
+ * player name, number of guesses used out of the maximum, and elapsed time.
+ */
 void print_game_summary(const char *name, int won,
                         int guesses_used, int total_seconds)
 {
@@ -198,8 +249,10 @@ void print_game_summary(const char *name, int won,
        printf(COLOR_BLUE COLOR_BOLD "+===========================+\n" COLOR_RESET);
 }
 
-/* -- Leaderboard -------------------------------------------------------- */
-
+/*
+ * Prints the column header row for the leaderboard table.
+ * Called internally by show_leaderboard() before the data rows are printed.
+ */
 static void print_leaderboard_header(void)
 {
        printf(COLOR_BLUE COLOR_BOLD "+============================================================+\n" COLOR_RESET);
@@ -221,6 +274,11 @@ static void print_leaderboard_header(void)
        printf(COLOR_BLUE COLOR_BOLD "+======+====================+========+============+==========+\n" COLOR_RESET);
 }
 
+/*
+ * Prints the leaderboard header and then delegates to readLeaderboard()
+ * to populate the data rows from the saved leaderboard file.
+ * Draws a closing border after the data.
+ */
 void show_leaderboard(void)
 {
        print_leaderboard_header();
@@ -229,7 +287,10 @@ void show_leaderboard(void)
 }
 
 /* -- Input helpers ------------------------------------------------------ */
-
+/*
+ * Prompts the player to enter their name and reads it from stdin.
+ * Strips the trailing newline. Falls back to "Player" if the input is empty.
+ */
 void read_player_name(char *name, int max_len)
 {
        printf("Enter your name: ");
@@ -239,6 +300,13 @@ void read_player_name(char *name, int max_len)
               strcpy(name, "Player");
 }
 
+/*
+ * Reads a fixed-length equation string character by character, displaying
+ * a live preview with underscore placeholders for unfilled positions.
+ * Supports backspace/delete for corrections.
+ * Only accepts printable characters; Enter is only accepted once the
+ * buffer has reached max_len.
+ */
 void get_aesthetic_input(char *buffer, int max_len)
 {
        int current_len = 0;
@@ -259,6 +327,7 @@ void get_aesthetic_input(char *buffer, int max_len)
 
               if (ch == '\r' || ch == '\n')
               {
+                     /* only accept Enter when the buffer is exactly full */
                      if (current_len == max_len)
                             break;
                      continue;
@@ -266,6 +335,7 @@ void get_aesthetic_input(char *buffer, int max_len)
 
               if (ch == '\b' || ch == 127)
               {
+                     /* backspace: remove the last character if any */
                      if (current_len > 0)
                      {
                             current_len--;
@@ -274,6 +344,7 @@ void get_aesthetic_input(char *buffer, int max_len)
               }
               else if (current_len < max_len && isprint(ch))
               {
+                     /* append printable character to the buffer */
                      buffer[current_len] = ch;
                      current_len++;
                      buffer[current_len] = '\0';
@@ -282,6 +353,11 @@ void get_aesthetic_input(char *buffer, int max_len)
        printf("\n");
 }
 
+/*
+ * Displays a "press any key" message and blocks until the player
+ * presses a key. Used at the end of sub-screens to pause before
+ * the screen is cleared and the menu is redrawn.
+ */
 void prompt_return_to_menu(void)
 {
        printf("Press any key to return to menu...\n");

@@ -50,12 +50,14 @@ typedef enum
         CORRECT
 } SlotState;
 
-typedef struct{
+typedef struct
+{
         char character;
         int correct_position;
 } SlotInput;
 
-typedef struct LeGameFSM{
+typedef struct LeGameFSM
+{
         GameState current_state;
         SlotState *current_guess;
         char **guess_history;
