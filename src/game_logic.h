@@ -79,6 +79,5 @@ ValidationStatus validate_guess(GameFSM *game, const char *guess);
 SlotState *evaluate_guess(GameFSM *game, const char *guess);
 void game_result(GameFSM *game, const char *guess, const SlotState *feedback);
 GuessStatus play_guess_turn(GameFSM *game, const char *guess);
-const char *game_state_to_string(GameState state);
 
 #endif

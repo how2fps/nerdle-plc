@@ -459,26 +459,3 @@ int is_game_won(const GameFSM *game)
 
        return game->has_won;
 }
-
-const char *game_state_to_string(GameState state)
-{
-       switch (state)
-       {
-       case GAME_STATE_START:
-              return "START";
-       case GAME_STATE_INPUT:
-              return "INPUT";
-       case GAME_STATE_VALIDATION:
-              return "VALIDATION";
-       case GAME_STATE_EVALUATION:
-              return "EVALUATION";
-       case GAME_STATE_RESULT:
-              return "RESULT";
-       case GAME_STATE_WON:
-              return "WON";
-       case GAME_STATE_LOST:
-              return "LOST";
-       default:
-              return "UNKNOWN";
-       }
-}
