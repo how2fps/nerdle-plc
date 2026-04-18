@@ -11,15 +11,31 @@
 
 void print_menu(void)
 {
+       printf("\n");
        printf(COLOR_CYAN COLOR_BOLD "+============================+\n" COLOR_RESET);
-       printf(COLOR_CYAN COLOR_BOLD "|     NERDLE  GAME  MENU     |\n" COLOR_RESET);
+       printf(COLOR_CYAN COLOR_BOLD "|" COLOR_RESET);
+       printf(COLOR_SILVER COLOR_BOLD "     NERDLE  GAME  MENU     " COLOR_RESET);
+       printf(COLOR_CYAN COLOR_BOLD "|\n" COLOR_RESET);
        printf(COLOR_CYAN COLOR_BOLD "+============================+\n" COLOR_RESET);
-       printf(COLOR_CYAN "|   1. Play Game             |\n" COLOR_RESET);
-       printf(COLOR_CYAN "|   2. Check Leaderboard     |\n" COLOR_RESET);
-       printf(COLOR_CYAN "|   3. Add New Equation      |\n" COLOR_RESET);
-       printf(COLOR_CYAN "|   4. Challenge Mode        |\n" COLOR_RESET);
-       printf(COLOR_CYAN "|   5. Watch Replay          |\n" COLOR_RESET);
-       printf(COLOR_CYAN "|   6. Exit                  |\n" COLOR_RESET);
+
+       printf(COLOR_CYAN COLOR_BOLD "|" COLOR_RESET);
+       printf(COLOR_GREEN COLOR_BOLD "    1. Play Game            " COLOR_RESET);
+       printf(COLOR_CYAN COLOR_BOLD "|\n" COLOR_RESET);
+       printf(COLOR_CYAN COLOR_BOLD "|" COLOR_RESET);
+       printf(COLOR_YELLOW COLOR_BOLD "    2. Check Leaderboard    " COLOR_RESET);
+       printf(COLOR_CYAN COLOR_BOLD "|\n" COLOR_RESET);
+       printf(COLOR_CYAN COLOR_BOLD "|" COLOR_RESET);
+       printf(COLOR_CYAN COLOR_BOLD "    3. Add New Equation     " COLOR_RESET);
+       printf(COLOR_CYAN COLOR_BOLD "|\n" COLOR_RESET);
+       printf(COLOR_CYAN COLOR_BOLD "|" COLOR_RESET);
+       printf(COLOR_RED COLOR_BOLD "    4. Challenge Mode       " COLOR_RESET);
+       printf(COLOR_CYAN COLOR_BOLD "|\n" COLOR_RESET);
+       printf(COLOR_CYAN COLOR_BOLD "|" COLOR_RESET);
+       printf(COLOR_BLUE COLOR_BOLD "    5. Watch Replay         " COLOR_RESET);
+       printf(COLOR_CYAN COLOR_BOLD "|\n" COLOR_RESET);
+       printf(COLOR_CYAN COLOR_BOLD "|" COLOR_RESET);
+       printf(COLOR_SILVER COLOR_BOLD "    6. Exit                 " COLOR_RESET);
+       printf(COLOR_CYAN COLOR_BOLD "|\n" COLOR_RESET);
        printf(COLOR_CYAN COLOR_BOLD "+============================+\n" COLOR_RESET);
        printf("  Selection: ");
 }
@@ -27,7 +43,22 @@ void print_menu(void)
 void print_section_header(const char *title)
 {
        printf(COLOR_BLUE COLOR_BOLD "\n+============================+\n" COLOR_RESET);
-       printf(COLOR_BLUE COLOR_BOLD "| %-27s|\n" COLOR_RESET, title);
+       printf(COLOR_BLUE COLOR_BOLD "|" COLOR_RESET);
+
+       if(!strcmp(title, "ADD EQUATION")){
+              printf(COLOR_CYAN COLOR_BOLD " %-27s" COLOR_RESET, title);   
+       }
+       else if(!strcmp(title, "CHALLENGE MODE")){
+              printf(COLOR_RED COLOR_BOLD " %-27s" COLOR_RESET, title);
+       }
+       else if(!strcmp(title, "WATCH REPLAY")){
+              printf(COLOR_BLUE COLOR_BOLD " %-27s" COLOR_RESET, title);
+       } 
+       else{
+              printf(COLOR_SILVER COLOR_BOLD " %-27s" COLOR_RESET, title);
+       }
+
+       printf(COLOR_BLUE COLOR_BOLD "|\n" COLOR_RESET);
        printf(COLOR_BLUE COLOR_BOLD "+============================+\n" COLOR_RESET);
 }
 
@@ -53,7 +84,16 @@ void print_guess_board(const GameFSM *game)
 
        printf("\033[H\033[J");
        printf("Target equation (for debugging): %s\n", game->answer);
-       printf("======== NERDLE ========\n");
+       printf(COLOR_CYAN COLOR_BOLD "+======================+\n" COLOR_RESET);
+       printf(COLOR_CYAN COLOR_BOLD "|" COLOR_RESET);
+       printf(COLOR_GREEN COLOR_BOLD "      N " COLOR_RESET);
+       printf(COLOR_YELLOW COLOR_BOLD "E " COLOR_RESET);
+       printf(COLOR_GREEN COLOR_BOLD "R " COLOR_RESET);
+       printf(COLOR_YELLOW COLOR_BOLD "D " COLOR_RESET);
+       printf(COLOR_GREEN COLOR_BOLD "L " COLOR_RESET);
+       printf(COLOR_RED COLOR_BOLD "E     " COLOR_RESET);
+       printf(COLOR_CYAN COLOR_BOLD "|\n" COLOR_RESET);
+       printf(COLOR_CYAN COLOR_BOLD "+======================+\n" COLOR_RESET);
        for (row = 0; row < game->max_guesses; row++)
        {
               if (row < game->guesses_used)
@@ -104,8 +144,10 @@ void print_game_summary(const char *name, int won,
 
        printf("\n");
        printf(COLOR_BLUE COLOR_BOLD "+===========================+\n");
-       printf("|        GAME SUMMARY       |\n");
-       printf("+===========================+\n" COLOR_RESET);
+       printf(COLOR_BLUE COLOR_BOLD "|" COLOR_RESET);
+       printf(COLOR_SILVER COLOR_BOLD "        GAME SUMMARY       " COLOR_RESET);
+       printf(COLOR_BLUE COLOR_BOLD "|\n" COLOR_RESET);
+       printf(COLOR_BLUE COLOR_BOLD  "+===========================+\n" COLOR_RESET);
 
        if (won)
               printf(COLOR_BLUE COLOR_BOLD "|  Result : " COLOR_GREEN "%-16s" COLOR_BLUE COLOR_BOLD "|\n" COLOR_RESET, "YOU WON!");
@@ -123,9 +165,21 @@ void print_game_summary(const char *name, int won,
 static void print_leaderboard_header(void)
 {
        printf(COLOR_BLUE COLOR_BOLD "+============================================================+\n" COLOR_RESET);
-       printf(COLOR_BLUE COLOR_BOLD "|                       LEADERBOARD                          |\n" COLOR_RESET);
+       printf(COLOR_BLUE COLOR_BOLD "|" COLOR_RESET);
+       printf(COLOR_SILVER COLOR_BOLD "                       LEADERBOARD                          " COLOR_RESET);
+       printf(COLOR_BLUE COLOR_BOLD "|\n" COLOR_RESET);
        printf(COLOR_BLUE COLOR_BOLD "+======+====================+========+============+==========+\n" COLOR_RESET);
-       printf(COLOR_BLUE COLOR_BOLD "| Rank | Player             | Time   | Date       | Logged   |\n" COLOR_RESET);
+       printf(COLOR_BLUE COLOR_BOLD "|" COLOR_RESET);
+       printf(COLOR_SILVER COLOR_BOLD " Rank " COLOR_RESET);
+       printf(COLOR_BLUE COLOR_BOLD "|" COLOR_RESET);
+       printf(COLOR_SILVER COLOR_BOLD " Player             " COLOR_RESET);
+       printf(COLOR_BLUE COLOR_BOLD "|" COLOR_RESET);
+       printf(COLOR_SILVER COLOR_BOLD " Time   " COLOR_RESET);
+       printf(COLOR_BLUE COLOR_BOLD "|" COLOR_RESET);
+       printf(COLOR_SILVER COLOR_BOLD " Date       " COLOR_RESET);
+       printf(COLOR_BLUE COLOR_BOLD "|" COLOR_RESET);
+       printf(COLOR_SILVER COLOR_BOLD " Logged   " COLOR_RESET);
+       printf(COLOR_BLUE COLOR_BOLD "|\n" COLOR_RESET);
        printf(COLOR_BLUE COLOR_BOLD "+======+====================+========+============+==========+\n" COLOR_RESET);
 }
 
