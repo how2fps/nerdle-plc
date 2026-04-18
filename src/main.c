@@ -65,6 +65,7 @@ static void run_game_session(const char *name, char *equation)
                      {
                      }
                      printf(COLOR_RED "[!!] Input too long - must be %d characters.\n" COLOR_RESET, EQUATION_LEN);
+                     printf("\n");
                      continue;
               }
 
@@ -76,10 +77,14 @@ static void run_game_session(const char *name, char *equation)
 
               status = play_guess_turn(game, guess);
               if (status == GUESS_INVALID)
+              {
+                     printf("\n");
                      continue;
+              }
               if (status == GUESS_ERROR)
               {
                      printf(COLOR_RED "[!!] Could not evaluate guess. Try again.\n" COLOR_RESET);
+                     printf("\n");
                      continue;
               }
 
@@ -126,6 +131,7 @@ int main(void)
        int running = 1;
        char *equation;
 
+       print_intro();
        while (running)
        {
               print_menu();
@@ -212,6 +218,7 @@ int main(void)
                             if (duplicate)
                             {
                                    printf(COLOR_YELLOW "Equation already exists!\n" COLOR_RESET);
+                                   prompt_return_to_menu();
                             }
                             else
                             {
@@ -224,11 +231,13 @@ int main(void)
                                    fprintf(fp, "%s\n", input);
                                    fclose(fp);
                                    printf(COLOR_GREEN "Equation added!\n" COLOR_RESET);
+                                   prompt_return_to_menu();
                             }
                      }
                      else
                      {
                             printf(COLOR_RED "Invalid equation. Not added.\n" COLOR_RESET);
+                            prompt_return_to_menu();
                      }
                      break;
 
@@ -266,7 +275,7 @@ int main(void)
                      break;
 
               case '6':
-                     printf(COLOR_CYAN COLOR_BOLD " Goodbye!\n" COLOR_RESET);
+                     printf(COLOR_CYAN COLOR_BOLD "\n Goodbye! Thanks for playing!\n" COLOR_RESET);
                      running = 0;
                      break;
 

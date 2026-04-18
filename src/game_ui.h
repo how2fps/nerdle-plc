@@ -21,6 +21,7 @@
 #define RESET COLOR_RESET
 
 /* -- Menu ------------------------------------------------------ */
+void print_intro(void);
 void print_menu(void);
 void print_section_header(const char *title);
 

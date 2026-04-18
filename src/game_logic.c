@@ -4,6 +4,7 @@
 #include "evaluator.h"
 #include "game_logic.h"
 #include "parser.h"
+#include "game_ui.h"
 
 void print(GameFSM *this)
 {
@@ -370,19 +371,19 @@ GuessStatus play_guess_turn(GameFSM *game, const char *guess)
        {
               if (validation_status == VALIDATION_WRONG_LENGTH)
               {
-                     printf("Invalid equation! Must be %d characters.\n\n", EQUATION_LEN);
+                     printf(COLOR_RED "Invalid equation! Must be %d characters.\n\n" COLOR_RESET, EQUATION_LEN);
               }
               else if (validation_status == VALIDATION_BAD_EQUATION)
               {
-                     printf("Invalid equation! Try again.\n\n");
+                     printf(COLOR_RED "Invalid equation! Try again.\n\n" COLOR_RESET);
               }
               else if (validation_status == VALIDATION_REPEAT_EQUATION)
               {
-                     printf("Equation already guessed!\n\n");
+                     printf(COLOR_RED "Equation already guessed!\n\n" COLOR_RESET);
               }
               else
               {
-                     printf("Invalid input. Try again.\n\n");
+                     printf(COLOR_RED "Invalid input. Try again.\n\n" COLOR_RESET);
               }
               return GUESS_INVALID;
        }

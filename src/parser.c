@@ -4,6 +4,7 @@
 #include <ctype.h>
 #include "parser.h"
 #include "evaluator.h"
+#include "game_ui.h"
 
 static FSMState next_state(FSMState current, char c)
 {
@@ -70,26 +71,26 @@ int validate_equation(const char *expr)
 
               if (state == STATE_INVALID)
               {
-                     printf("Rejected at char %d ('%c') -> SINK\n", i, expr[i]);
+                     printf(COLOR_RED "Rejected at char %d ('%c') -> SINK\n" COLOR_RESET, i, expr[i]);
                      return 0;
               }
        }
 
        if (count != EQUATION_LEN)
        {
-              printf("Rejected: length %d != %d\n", count, EQUATION_LEN);
+              printf(COLOR_RED "Rejected: length %d != %d\n" COLOR_RESET, count, EQUATION_LEN);
               return 0;
        }
 
        if (state != STATE_NUM_RIGHT)
        {
-              printf("Rejected: ended in non-accepting state\n");
+              printf(COLOR_RED "Rejected: ended in non-accepting state\n" COLOR_RESET);
               return 0;
        }
 
        if (equal_position < 1 || equal_position >= count - 1)
        {
-              printf("Rejected: '=' in invalid position\n");
+              printf(COLOR_RED "Rejected: '=' in invalid position\n" COLOR_RESET);
               return 0;
        }
 

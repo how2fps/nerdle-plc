@@ -9,8 +9,37 @@
 
 #define MAX_GUESSES 6
 
+void print_intro(void)
+{
+       printf("\033[2J\033[H");
+       printf("\n");
+       printf(COLOR_CYAN COLOR_BOLD "+============================+\n" COLOR_RESET);
+       printf(COLOR_CYAN COLOR_BOLD "|" COLOR_RESET);
+       printf(COLOR_CYAN COLOR_BOLD "      WELCOME TO NERDLE     " COLOR_RESET);
+       printf(COLOR_CYAN COLOR_BOLD "|\n" COLOR_RESET);
+       printf(COLOR_CYAN COLOR_BOLD "+============================+\n" COLOR_RESET);
+
+       printf(COLOR_SILVER COLOR_BOLD "\n  Nerdle is a number-based\n" COLOR_RESET);
+       printf(COLOR_SILVER COLOR_BOLD "  word game. Guess the hidden\n" COLOR_RESET);
+       printf(COLOR_SILVER COLOR_BOLD "  equation in 6 tries!\n" COLOR_RESET);
+
+       printf(COLOR_CYAN COLOR_BOLD "\n  HOW TO PLAY:\n" COLOR_RESET);
+       printf(COLOR_SILVER "  - Each guess must be a valid\n" COLOR_RESET);
+       printf(COLOR_SILVER "    equation of exactly 8 chars\n" COLOR_RESET);
+       printf(COLOR_SILVER "    (e.g. 12+3=15 or 9*8=72)\n\n" COLOR_RESET);
+
+       printf(COLOR_GREEN "  [G]" COLOR_RESET COLOR_SILVER " = correct position\n" COLOR_RESET);
+       printf(COLOR_YELLOW "  [Y]" COLOR_RESET COLOR_SILVER " = wrong position\n" COLOR_RESET);
+       printf(COLOR_RED "  [R]" COLOR_RESET COLOR_SILVER " = not in equation\n" COLOR_RESET);
+
+       printf(COLOR_CYAN COLOR_BOLD "\n+============================+\n" COLOR_RESET);
+       printf(COLOR_SILVER "  Press any key to continue..." COLOR_RESET);
+       getch();
+}
+
 void print_menu(void)
 {
+       printf("\033[2J\033[H");
        printf("\n");
        printf(COLOR_CYAN COLOR_BOLD "+============================+\n" COLOR_RESET);
        printf(COLOR_CYAN COLOR_BOLD "|" COLOR_RESET);
@@ -37,25 +66,34 @@ void print_menu(void)
        printf(COLOR_SILVER COLOR_BOLD "    6. Exit                 " COLOR_RESET);
        printf(COLOR_CYAN COLOR_BOLD "|\n" COLOR_RESET);
        printf(COLOR_CYAN COLOR_BOLD "+============================+\n" COLOR_RESET);
-       printf("  Selection: ");
+       printf("Selection: ");
 }
 
 void print_section_header(const char *title)
 {
+       int title_len = (int)strlen(title);
+       int total_width = 28;
+       int padding = (total_width - title_len) / 2;
+       int right_pad = total_width - title_len - padding;
+
        printf(COLOR_BLUE COLOR_BOLD "\n+============================+\n" COLOR_RESET);
        printf(COLOR_BLUE COLOR_BOLD "|" COLOR_RESET);
 
-       if(!strcmp(title, "ADD EQUATION")){
-              printf(COLOR_CYAN COLOR_BOLD " %-27s" COLOR_RESET, title);   
+       if (!strcmp(title, "ADD EQUATION"))
+       {
+              printf(COLOR_CYAN COLOR_BOLD "%*s%s%*s" COLOR_RESET, padding, "", title, right_pad, "");
        }
-       else if(!strcmp(title, "CHALLENGE MODE")){
-              printf(COLOR_RED COLOR_BOLD " %-27s" COLOR_RESET, title);
+       else if (!strcmp(title, "CHALLENGE MODE"))
+       {
+              printf(COLOR_RED COLOR_BOLD "%*s%s%*s" COLOR_RESET, padding, "", title, right_pad, "");
        }
-       else if(!strcmp(title, "WATCH REPLAY")){
-              printf(COLOR_BLUE COLOR_BOLD " %-27s" COLOR_RESET, title);
-       } 
-       else{
-              printf(COLOR_SILVER COLOR_BOLD " %-27s" COLOR_RESET, title);
+       else if (!strcmp(title, "WATCH REPLAY"))
+       {
+              printf(COLOR_BLUE COLOR_BOLD "%*s%s%*s" COLOR_RESET, padding, "", title, right_pad, "");
+       }
+       else
+       {
+              printf(COLOR_SILVER COLOR_BOLD "%*s%s%*s" COLOR_RESET, padding, "", title, right_pad, "");
        }
 
        printf(COLOR_BLUE COLOR_BOLD "|\n" COLOR_RESET);
@@ -83,7 +121,7 @@ void print_guess_board(const GameFSM *game)
               return;
 
        printf("\033[H\033[J");
-       printf("Target equation (for debugging): %s\n", game->answer);
+       printf("\nTarget equation (for debugging): %s\n\n", game->answer);
        printf(COLOR_CYAN COLOR_BOLD "+======================+\n" COLOR_RESET);
        printf(COLOR_CYAN COLOR_BOLD "|" COLOR_RESET);
        printf(COLOR_GREEN COLOR_BOLD "      N " COLOR_RESET);
@@ -123,7 +161,7 @@ void print_turn_status(const GameFSM *game)
 {
        print_guess_board(game);
        if (is_game_won(game) == 1)
-              printf("You got the answer!\n");
+              printf("Congratulations! You got the answer!\n");
        else
               printf("Guesses left: %d\n\n", get_guesses_left(game));
 }
@@ -147,7 +185,7 @@ void print_game_summary(const char *name, int won,
        printf(COLOR_BLUE COLOR_BOLD "|" COLOR_RESET);
        printf(COLOR_SILVER COLOR_BOLD "        GAME SUMMARY       " COLOR_RESET);
        printf(COLOR_BLUE COLOR_BOLD "|\n" COLOR_RESET);
-       printf(COLOR_BLUE COLOR_BOLD  "+===========================+\n" COLOR_RESET);
+       printf(COLOR_BLUE COLOR_BOLD "+===========================+\n" COLOR_RESET);
 
        if (won)
               printf(COLOR_BLUE COLOR_BOLD "|  Result : " COLOR_GREEN "%-16s" COLOR_BLUE COLOR_BOLD "|\n" COLOR_RESET, "YOU WON!");
@@ -194,7 +232,7 @@ void show_leaderboard(void)
 
 void read_player_name(char *name, int max_len)
 {
-       printf("  Enter your name: ");
+       printf("Enter your name: ");
        fgets(name, max_len, stdin);
        name[strcspn(name, "\n")] = '\0';
        if (strlen(name) == 0)
