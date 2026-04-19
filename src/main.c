@@ -269,6 +269,7 @@ int main(void)
                             validation_status = process_line(input, 1);
                      } while (validation_status == -1 || validate_equation(input) == 0 || validation_status == 0);
 
+                     enter_game_view();
                      read_player_name(name, MAX_NAME_LEN);
 
                      len = strlen(input);
