@@ -80,6 +80,13 @@ static void run_game_session(const char *name, char *equation)
                      continue;
               }
 
+              if (guess_len != EQUATION_LEN)
+              {
+                     printf(COLOR_RED "[!!] Input must be exactly %d characters.\n" COLOR_RESET, EQUATION_LEN);
+                     printf("\n");
+                     continue;
+              }
+
               /* "q" lets the player abandon the current session */
               if (!strcmp(guess_input, "q"))
                      break;
@@ -266,8 +273,13 @@ int main(void)
                      do
                      {
                             get_aesthetic_input(input, EQUATION_LEN);
+                            if (validate_equation(input) == 0)
+                            {
+                                   validation_status = 0;
+                                   continue;
+                            }
                             validation_status = process_line(input, 1);
-                     } while (validation_status == -1 || validate_equation(input) == 0 || validation_status == 0);
+                     } while (validation_status == -1 || validation_status == 0);
 
                      enter_game_view();
                      read_player_name(name, MAX_NAME_LEN);

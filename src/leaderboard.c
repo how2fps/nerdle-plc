@@ -4,6 +4,12 @@
 #include <time.h>
 #include "leaderboard.h"
 
+#define COLOR_GOLD "\033[93m"
+#define COLOR_SILVER "\033[37m"
+#define COLOR_BRONZE "\033[33m"
+#define COLOR_CYAN "\033[36m"
+#define COLOR_RESET "\033[0m"
+
 /*
  * Opens LEADERBOARD_FILE and parses up to maxEntries records into the
  * provided entries array. Blank lines are silently skipped. Lines that
@@ -70,11 +76,20 @@ void readLeaderboard(void)
         return;
     }
 
-    printf("%-6s %-20s %-8s %-12s %-10s\n", "Rank", "Name", "Time", "Date", "Logged");
-    printf("%-6s %-20s %-8s %-12s %-10s\n", "----", "----", "----", "----", "------");
     for (i = 0; i < count; i++)
     {
-        printf("%-6d %-20s %02d:%02d    %-12s %-10s\n",
+        const char *color;
+        if (i == 0)
+            color = COLOR_GOLD;
+        else if (i == 1)
+            color = COLOR_SILVER;
+        else if (i == 2)
+            color = COLOR_BRONZE;
+        else
+            color = COLOR_RESET;
+
+        printf("%s%-6d %-20s %02d:%02d    %-12s %-10s" COLOR_RESET "\n",
+               color,
                i + 1,
                entries[i].name,
                entries[i].minutes,
