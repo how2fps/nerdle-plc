@@ -6,6 +6,10 @@
 #include "parser.h"
 #include "game_ui.h"
 
+/*
+ * Debug helper that prints a brief summary of the current game state
+ * (number of guesses remaining) to stdout.
+ */
 void print(GameFSM *this)
 {
        if (this == NULL)
@@ -17,6 +21,18 @@ void print(GameFSM *this)
        printf("-------------------------\n");
 }
 
+/*
+ * Allocates and fully initialises a new GameFSM on the heap.
+ * Sets up the answer string, guess/feedback history arrays (one row
+ * per allowed guess), the character frequency table used by the
+ * two-pass feedback algorithm, and the initial FSM state.
+ *
+ * All allocations are checked; on any failure the function frees
+ * everything allocated so far and returns NULL (no memory leaks).
+ *
+ * Returns a heap-allocated GameFSM, or NULL on allocation failure.
+ * The caller must eventually call destroy_game() to free the memory.
+ */
 GameFSM *create_game(char *target_equation, int max_guesses, int initial_has_won)
 {
        int i;
@@ -85,10 +101,14 @@ GameFSM *create_game(char *target_equation, int max_guesses, int initial_has_won
               g->current_state = GAME_STATE_START;
        }
        g->has_won = initial_has_won;
-       /* print(g); */
        return g;
 }
 
+/*
+ * Advances the FSM to its next state based on the current state and
+ * the incoming event. Invalid event/state combinations are silently
+ * ignored (the FSM stays in its current state).
+ */
 void transition_gamestate(GameFSM *fsm, GameEvent event)
 {
        if (fsm == NULL)
@@ -119,6 +139,7 @@ void transition_gamestate(GameFSM *fsm, GameEvent event)
               }
               else if (event == GAME_EVENT_VALIDATION_FAIL)
               {
+                     /* invalid guess — return to input without consuming a turn */
                      fsm->current_state = GAME_STATE_INPUT;
               }
               break;
@@ -147,6 +168,7 @@ void transition_gamestate(GameFSM *fsm, GameEvent event)
 
        case GAME_STATE_WON:
        case GAME_STATE_LOST:
+              /* terminal states; only GAME_EVENT_INIT can restart them */
               if (event == GAME_EVENT_INIT)
               {
                      fsm->current_state = GAME_STATE_INPUT;
@@ -159,6 +181,19 @@ void transition_gamestate(GameFSM *fsm, GameEvent event)
        }
 }
 
+/*
+ * Checks that a guess string is acceptable before it is evaluated.
+ * Validation fails (and the FSM transitions back to GAME_STATE_INPUT)
+ * if any of the following are true:
+ *   - guess or game is NULL
+ *   - length is not exactly EQUATION_LEN
+ *   - the equation is syntactically invalid (FSM in parser.c)
+ *   - the equation causes division by zero
+ *   - the two sides of the equation are not numerically equal
+ *   - the guess has already been submitted in this session
+ *
+ * On success, transitions the FSM to GAME_STATE_EVALUATION.
+ */
 ValidationStatus validate_guess(GameFSM *game, const char *guess)
 {
        int i;
@@ -209,6 +244,10 @@ ValidationStatus validate_guess(GameFSM *game, const char *guess)
        return VALIDATION_OK;
 }
 
+/*
+ * Builds a SlotInput struct for a single character position by comparing
+ * the guessed character against the answer character at the same position.
+ */
 static SlotInput next_slot_input(
     char guess_char,
     char answer_char,
@@ -220,6 +259,23 @@ static SlotInput next_slot_input(
        return input;
 }
 
+/*
+ * Determines the feedback colour for a single slot using the two-pass algorithm.
+ *
+ * Pass 1 (iteration == 1): handles exact matches only.
+ *   - CORRECT  if the character is in the right position; decrements its
+ *              frequency count so it cannot also trigger a PARTIAL on pass 2.
+ *   - WRONG    placeholder for all non-exact-match slots (overwritten in pass 2).
+ *
+ * Pass 2 (iteration == 2): handles non-exact-match slots.
+ *   - CORRECT  if it was already marked correct in pass 1 (left unchanged).
+ *   - PARTIAL  if the character appears somewhere in the answer AND its
+ *              remaining frequency count is > 0; decrements the count.
+ *   - WRONG    otherwise.
+ *
+ * The frequency table (game->freq) is pre-populated by evaluate_guess()
+ * before either pass runs.
+ */
 static SlotState next_slot_state(int iteration, GameFSM *game, SlotInput input)
 {
        if (iteration == 1)
@@ -256,6 +312,18 @@ static SlotState next_slot_state(int iteration, GameFSM *game, SlotInput input)
        }
 }
 
+/*
+ * Generates a per-slot feedback array for the given guess against the
+ * stored answer using the two-pass algorithm.
+ *
+ * Before the passes begin, game->freq is populated with the frequency
+ * of each character in the answer. Pass 1 then resolves CORRECT slots
+ * and decrements their counts; pass 2 resolves PARTIAL and WRONG slots
+ * using the remaining counts.
+ *
+ * Returns a heap-allocated SlotState array of length EQUATION_LEN,
+ * or NULL on allocation failure or mismatched lengths.
+ */
 SlotState *evaluate_guess(GameFSM *game, const char *guess)
 {
        size_t i, j;
@@ -272,11 +340,13 @@ SlotState *evaluate_guess(GameFSM *game, const char *guess)
               free(result);
               return NULL;
        }
+       /* build the character frequency table from the answer */
        memset(game->freq, 0, sizeof(game->freq));
        for (i = 0; i < len; i++)
        {
               game->freq[(unsigned char)game->answer[i]]++;
        }
+       /* run two passes over every slot to assign CORRECT, PARTIAL, or WRONG */
        for (j = 1; j <= 2; j++)
        {
               for (i = 0; i < len; i++)
@@ -288,6 +358,14 @@ SlotState *evaluate_guess(GameFSM *game, const char *guess)
        return result;
 }
 
+/*
+ * Records a completed guess and its feedback into the history arrays,
+ * increments guesses_used, and transitions the FSM to the appropriate
+ * next state:
+ *   - GAME_STATE_WON   if all slots are CORRECT
+ *   - GAME_STATE_LOST  if no guesses remain
+ *   - GAME_STATE_INPUT otherwise (game continues)
+ */
 void game_result(GameFSM *game, const char *guess, const SlotState *feedback)
 {
        int i;
@@ -339,7 +417,26 @@ void game_result(GameFSM *game, const char *guess, const SlotState *feedback)
        }
 }
 
-/* "main" function of game logic */
+/*
+ * The main entry point for a single guess attempt. Drives the GameFSM
+ * through the full validate → evaluate → record cycle for one guess:
+ *
+ *   1. Initialise the FSM if it is still in GAME_STATE_START.
+ *   2. Advance from GAME_STATE_INPUT to GAME_STATE_VALIDATION.
+ *   3. Call validate_guess(); print an error and return GUESS_INVALID
+ *      if validation fails (the guess does not consume a turn).
+ *   4. Call evaluate_guess() to produce per-slot feedback.
+ *   5. Advance to GAME_STATE_RESULT and call game_result() to record
+ *      the guess and update the FSM state.
+ *   6. Return GUESS_CORRECT if the game is now won, GUESS_INCORRECT
+ *      otherwise.
+ *
+ * Returns:
+ *   GUESS_CORRECT   - the guess matched the answer (game won)
+ *   GUESS_INCORRECT - valid guess, but not the answer
+ *   GUESS_INVALID   - guess failed validation (turn not consumed)
+ *   GUESS_ERROR     - unexpected state or NULL pointer
+ */
 GuessStatus play_guess_turn(GameFSM *game, const char *guess)
 {
        SlotState *feedback;
@@ -350,6 +447,7 @@ GuessStatus play_guess_turn(GameFSM *game, const char *guess)
               return GUESS_ERROR;
        }
 
+       /* advance through START -> INPUT -> VALIDATION */
        if (game->current_state == GAME_STATE_START)
        {
               transition_gamestate(game, GAME_EVENT_INIT); /* to GAME_STATE_INPUT  */
@@ -410,6 +508,11 @@ GuessStatus play_guess_turn(GameFSM *game, const char *guess)
        return GUESS_INCORRECT;
 }
 
+/*
+ * Frees all heap memory owned by the GameFSM, including each row of
+ * the guess and feedback history arrays, the history pointer arrays
+ * themselves, the answer string, and the GameFSM struct.
+ */
 void destroy_game(GameFSM *game)
 {
        int i;
@@ -434,6 +537,11 @@ void destroy_game(GameFSM *game)
        free(game);
 }
 
+/*
+ * Returns the number of guesses the player still has available.
+ * Clamps to 0 if guesses_used somehow exceeds max_guesses.
+ * Returns 0 if the GameFSM pointer is NULL.
+ */
 int get_guesses_left(const GameFSM *game)
 {
        int guesses_left;
@@ -452,6 +560,10 @@ int get_guesses_left(const GameFSM *game)
        return guesses_left;
 }
 
+/*
+ * Returns 1 if the player has correctly guessed the equation, 0 otherwise.
+ * Returns 0 if the GameFSM pointer is NULL.
+ */
 int is_game_won(const GameFSM *game)
 {
        if (game == NULL)

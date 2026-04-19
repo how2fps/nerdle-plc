@@ -16,8 +16,7 @@
  * iterates until it finds an empty token.
  * 
  * Returns:
- *   A pointer to the original expression string (unused by callers;
- *   kept for potential future use).
+ *   A pointer to the original expression string
  */
 char *tokenize_expression(const char *expression, Token tokens[EQUATION_LEN + 1])
 {

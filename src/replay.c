@@ -12,13 +12,10 @@
 /*
  * Serialises the completed game state to a binary .nrdl file inside
  * the "replays/" directory. The directory is created if it does not
- * already exist. The filename encodes the player name and a Unix
- * timestamp so each session produces a unique file.
+ * already exist.
  *
  * Only the guesses that were actually made are written — unfilled rows
  * in the guess_history are not included.
- *
- * Does nothing (returns silently) if the file cannot be opened.
  */
 void save_replay(const char name[MAX_NAME_LEN], GameFSM *g)
 {
@@ -61,9 +58,6 @@ void save_replay(const char name[MAX_NAME_LEN], GameFSM *g)
  * revealing one guess per keypress by incrementing guesses_used and
  * redrawing the board — mirroring exactly what the player saw during
  * the original session.
- *
- * Validates the magic header before reading any game data to guard
- * against corrupted or incorrectly formatted files.
  */
 void play_replay(void)
 {
@@ -148,7 +142,6 @@ void play_replay(void)
        fread(answer, 1, EQUATION_LEN + 1, fptr);
 
        fread(&guesses_used, sizeof(int), 1, fptr);
-       /*printf("guesses_used: %d\n", guesses_used);*/
 
        g = create_game(answer, max_guesses, 0);
 
@@ -157,7 +150,6 @@ void play_replay(void)
               fclose(fptr);
               return;
        }
-       /*printf("Valid file\n");*/
 
        g->guesses_used = guesses_used;
        for (i = 0; i < guesses_used; i++)

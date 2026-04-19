@@ -6,12 +6,11 @@
 
 /*
  * Returns the precedence level of a given arithmetic operator.
- * '*' and '/' have higher precedence (2) than '+' and '-' (1).
+ * '*' and '/' have higher precedence than '+' and '-'.
  * Any unrecognised character returns 0.
  * 
  * Used by infix_to_postfix() to decide when to pop the operator stack.
  */
-
 int precedence(char op)
 {
        if (op == '*' || op == '/')
@@ -167,7 +166,7 @@ int evaluate_expression(Token tokens[EQUATION_LEN + 1])
  * pipeline on a raw character buffer.
  *
  * On success, stores the computed value in *result and returns it.
- * Returns -1 (and leaves *result unchanged) on division by zero.
+ * Returns -1 on division by zero.
  */
 int evaluate_string(const char *buf, int len, int *result)
 {

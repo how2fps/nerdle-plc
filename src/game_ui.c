@@ -10,8 +10,8 @@
 #define MAX_GUESSES 6
 
 /*
- * Displays a one-time welcome screen when the program starts.
- * Clears the terminal, shows the game title in cyan, a short description,
+ * Displays a welcome screen when the program starts.
+ * Clears the terminal, shows the game title, a short description,
  * how-to-play rules, and the colour key for feedback tiles.
  * Waits for any keypress before returning so the player can read it.
  */
@@ -45,7 +45,6 @@ void print_intro(void)
 
 /*
  * Clears the screen and renders the main navigation menu.
- * Each menu option is colour-coded to match its associated section.
  * The player types a single character to select an option.
  */
 void print_menu(void)
@@ -81,10 +80,7 @@ void print_menu(void)
 }
 
 /*
- * Renders a centred section banner above each sub-screen (e.g. "WATCH REPLAY").
- *
- * Centering is computed from the inner box width (28 chars) and the
- * length of the title string.
+ * Renders a section banner above each sub-screen (e.g. "WATCH REPLAY").
  */
 void print_section_header(const char *title)
 {
@@ -197,7 +193,7 @@ void print_guess_board(const GameFSM *game)
 
 /*
  * Redraws the guess board and prints a status line below it.
- * Shows "You got the answer!" if the game has been won, or the
+ * Shows "Congratulations! You got the answer!" if the game has been won, or the
  * number of remaining guesses otherwise.
  */
 void print_turn_status(const GameFSM *game)
@@ -222,7 +218,7 @@ void print_game_lost_result(const GameFSM *game)
 }
 
 /*
- * Displays a formatted end-of-game summary box showing the outcome,
+ * Displays an end-of-game summary box showing the outcome,
  * player name, number of guesses used out of the maximum, and elapsed time.
  */
 void print_game_summary(const char *name, int won,
@@ -277,7 +273,6 @@ static void print_leaderboard_header(void)
 /*
  * Prints the leaderboard header and then delegates to readLeaderboard()
  * to populate the data rows from the saved leaderboard file.
- * Draws a closing border after the data.
  */
 void show_leaderboard(void)
 {
@@ -289,7 +284,7 @@ void show_leaderboard(void)
 /* -- Input helpers ------------------------------------------------------ */
 /*
  * Prompts the player to enter their name and reads it from stdin.
- * Strips the trailing newline. Falls back to "Player" if the input is empty.
+ * Falls back to "Player" if the input is empty.
  */
 void read_player_name(char *name, int max_len)
 {
@@ -354,7 +349,7 @@ void get_aesthetic_input(char *buffer, int max_len)
 }
 
 /*
- * Displays a "press any key" message and blocks until the player
+ * Displays a "Press any key to return to menu..." message and blocks until the player
  * presses a key. Used at the end of sub-screens to pause before
  * the screen is cleared and the menu is redrawn.
  */

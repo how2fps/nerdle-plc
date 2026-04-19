@@ -4,7 +4,14 @@
 #include <time.h>
 #include "leaderboard.h"
 
-/* loads leaderboard.txt file into array */
+/*
+ * Opens LEADERBOARD_FILE and parses up to maxEntries records into the
+ * provided entries array. Blank lines are silently skipped. Lines that
+ * do not match the expected six-field format are also skipped.
+ *
+ * Returns the number of successfully parsed entries, or 0 if the file
+ * could not be opened or contains no valid records.
+ */
 int loadLeaderboard(LeaderboardEntry entries[], int maxEntries)
 {
     FILE *fp;
@@ -40,7 +47,15 @@ int loadLeaderboard(LeaderboardEntry entries[], int maxEntries)
     return count;
 }
 
-/* Loads and displays the leaderboard table */
+/*
+ * Loads all leaderboard entries from the file and prints them as a
+ * formatted table to stdout. The table includes rank, name, completion
+ * time, date, and the time-of-day the entry was logged.
+ *
+ * Prints a message and returns early if no entries are found.
+ * Called by show_leaderboard() in game_ui.c, which draws the surrounding
+ * border before and after this function.
+ */
 void readLeaderboard(void)
 {
     LeaderboardEntry entries[MAX_ENTRIES];
@@ -69,7 +84,24 @@ void readLeaderboard(void)
     }
 }
 
-/* Writes a new entry to the leaderboard, sorted by score */
+/*
+ * Records a new winning entry into the leaderboard file, maintaining
+ * ascending sort order by total completion time (fastest time = rank 1).
+ *
+ * Steps:
+ *   1. Capture the current date and time using localtime().
+ *   2. Load existing entries from the file.
+ *   3. If the leaderboard is full (count >= MAX_ENTRIES), only insert
+ *      the new entry if it is faster than the slowest existing entry;
+ *      otherwise reject it and return 0.
+ *   4. Insert the new entry at the correct sorted position using a
+ *      rightward shift.
+ *   5. Rewrite the entire file with updated rank numbers.
+ *
+ * Returns:
+ *    0 - entry written successfully, or time did not qualify
+ *   -1 - file could not be opened for writing
+ */
 int writeLeaderboard(const char *name, int minutes, int seconds)
 {
     FILE *fp;
@@ -93,6 +125,7 @@ int writeLeaderboard(const char *name, int minutes, int seconds)
 
     count = loadLeaderboard(entries, MAX_ENTRIES);
 
+    /* if the leaderboard is full, check whether the new time beats the last entry */
     if (count >= MAX_ENTRIES)
     {
         existing_time = entries[MAX_ENTRIES - 1].minutes * 60 + entries[MAX_ENTRIES - 1].seconds;
@@ -108,6 +141,7 @@ int writeLeaderboard(const char *name, int minutes, int seconds)
         }
     }
 
+    /* find the correct insertion position using a rightward shift */
     i = count - 1;
     new_time = minutes * 60 + seconds;
     while (i >= 0)
@@ -123,9 +157,11 @@ int writeLeaderboard(const char *name, int minutes, int seconds)
             break;
         }
     }
+    /* insert the new entry at the gap left by the shift */
     entries[i + 1] = newEntry;
     count++;
 
+    /* rewrite the entire file so rank numbers stay consecutive and correct */
     fp = fopen(LEADERBOARD_FILE, "w");
     if (!fp)
     {

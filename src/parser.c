@@ -83,7 +83,7 @@ static FSMState next_state(FSMState current, char c)
 int validate_equation(const char *expr)
 {
        FSMState state = STATE_START;
-       int count = 0;           /* total characters processed */
+       int count = 0; /* total characters processed */
        int equal_position = -1; /* index of '=' in the string, -1 if not found */
        int i;
 
@@ -100,7 +100,7 @@ int validate_equation(const char *expr)
               {
                      equal_position = i;
               }
-              
+
               /* any invalid transition is an immediate rejection */
               if (state == STATE_INVALID)
               {
