@@ -3,7 +3,7 @@
 
 #define MAX_NAME_LEN 64
 #define MAX_ENTRIES 100
-#define LEADERBOARD_FILE "../leaderboard.txt"
+#define LEADERBOARD_FILE "leaderboard.txt"
 
 typedef struct
 {

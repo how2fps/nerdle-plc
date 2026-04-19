@@ -153,7 +153,7 @@ void print_guess_board(const GameFSM *game)
               return;
 
        printf("\033[H\033[J");
-       printf("\nTarget equation (for debugging): %s\n\n", game->answer);
+       /* printf("\nTarget equation (for debugging): %s\n\n", game->answer);*/
        printf(COLOR_CYAN COLOR_BOLD "+======================+\n" COLOR_RESET);
        printf(COLOR_CYAN COLOR_BOLD "|" COLOR_RESET);
        printf(COLOR_GREEN COLOR_BOLD "      N " COLOR_RESET);
